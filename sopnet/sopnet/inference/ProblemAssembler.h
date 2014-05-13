@@ -27,6 +27,8 @@ private:
 
 	void addSynapseConstraints();
 
+	void addSegmentPairConstraints();
+
 	void mapConstraints(boost::shared_ptr<LinearConstraints> linearConstraints);
 
 	void setCoefficient(const EndSegment& end);
@@ -34,6 +36,8 @@ private:
 	void setCoefficient(const ContinuationSegment& continuation);
 
 	void setCoefficient(const BranchSegment& branch);
+
+	void setCoefficient(const SegmentPair& segmentPair);
 
 	void extractSliceIdsMap();
 
@@ -48,6 +52,8 @@ private:
 	void extractMitochondriaEnclosingNeuronSegments();
 
 	void extractSynapseEnclosingNeuronSegments();
+
+	void extractSegmentPairs();
 
 	bool encloses(
 			boost::shared_ptr<Segment> neuronSegment,
