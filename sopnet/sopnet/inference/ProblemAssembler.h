@@ -100,6 +100,9 @@ private:
 	// all synapse segments in the problem
 	pipeline::Output<Segments>          _allSynapseSegments;
 
+	// all segment pairs in the problem
+	pipeline::Output<Segments>          _allSegmentPairs;
+
 	// all linear constraints on all segments
 	pipeline::Output<LinearConstraints> _allLinearConstraints;
 
@@ -136,6 +139,9 @@ private:
 
 	// the total number of slices
 	unsigned int _numSlices;
+
+	// number of segment pairs
+	unsigned int _numSegmentPairs;
 
 	// functor to compute the overlap between slices
 	Overlap _overlap;

@@ -191,6 +191,7 @@ Segments::getBranches(unsigned int interval) {
 		return EmptyBranches;
 
 	return _branches[interval];
+
 }
 
 std::vector<boost::shared_ptr<SegmentPair> >&
@@ -251,7 +252,7 @@ Segments::getSegments(unsigned int interval) {
 	std::vector<boost::shared_ptr<EndSegment> >          ends          = getEnds(interval);
 	std::vector<boost::shared_ptr<ContinuationSegment> > continuations = getContinuations(interval);
 	std::vector<boost::shared_ptr<BranchSegment> >       branches      = getBranches(interval);
-	std::vector<boost::shared_ptr<SegmentPair> >         segmentPairs  = getBranches(interval);
+	std::vector<boost::shared_ptr<SegmentPair> >         segmentPairs  = getSegmentPairs(interval);
 
 	std::copy(ends.begin(), ends.end(), std::back_inserter(allSegments));
 	std::copy(continuations.begin(), continuations.end(), std::back_inserter(allSegments));

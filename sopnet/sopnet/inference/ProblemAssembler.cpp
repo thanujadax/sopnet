@@ -36,6 +36,7 @@ ProblemAssembler::ProblemAssembler() :
 	_allNeuronSegments(new Segments()),
 	_allMitochondriaSegments(new Segments()),
 	_allSynapseSegments(new Segments()),
+	_allSegmentPairs(new Segments()),
 	_allLinearConstraints(new LinearConstraints()),
 	_problemConfiguration(new ProblemConfiguration()),
 	_overlap(false, false) {
@@ -58,6 +59,8 @@ ProblemAssembler::ProblemAssembler() :
 void
 ProblemAssembler::updateOutputs() {
 
+	extractSegmentPairs();
+
 	collectSegments();
 
 	// make sure slices are used from both sides
@@ -74,6 +77,17 @@ ProblemAssembler::updateOutputs() {
 }
 
 void
+ProblemAssembler::extractSegmentPairs() {
+
+
+	// 	For each adjacent pair of intervals,
+	// 		for each slice
+	// 			each pair of segments on either side of that slice
+	// populate _allSegmentPairs
+
+}
+
+void
 ProblemAssembler::collectSegments() {
 
 	LOG_DEBUG(problemassemblerlog) << "collecting segments..." << std::endl;
@@ -84,6 +98,7 @@ ProblemAssembler::collectSegments() {
 	_numMitochondriaSegments = 0;
 	_allSynapseSegments->clear();
 	_numSynapseSegments = 0;
+	_numSegmentPairs = 0;
 
 	foreach (boost::shared_ptr<Segments> segments, _neuronSegments) {
 
@@ -103,6 +118,12 @@ ProblemAssembler::collectSegments() {
 		_allSegments->addAll(segments);
 		_allSynapseSegments->addAll(segments);
 		_numSynapseSegments += segments->size();
+	}
+
+	foreach (boost::shared_ptr<Segments> segments, _allSegmentPairs) {
+
+		_allSegments->addAll(segments);
+		_numSegmentPairs += segments->size();
 	}
 
 	LOG_DEBUG(problemassemblerlog) << "collected " << _allSegments->size() << " segments" << std::endl;
@@ -504,6 +525,11 @@ ProblemAssembler::extractSynapseEnclosingNeuronSegments() {
 			if (encloses(branch, synapseSegment, _enclosingSynapseThreshold))
 				_synapseEnclosingNeuronSegments[synapseSegmentId].push_back(branch->getId());
 	}
+}
+
+void
+ProblemAssembler::extractSegmentPairs() {
+
 }
 
 bool

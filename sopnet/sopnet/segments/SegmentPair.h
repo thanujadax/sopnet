@@ -9,6 +9,7 @@
 #define SOPNET_SEGMENTPAIR_H_
 
 #include "Segment.h"
+#include "ContinuationSegment.h"
 
 // forward declarations
 class ContinuationSegment;

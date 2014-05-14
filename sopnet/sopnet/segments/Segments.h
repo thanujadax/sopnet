@@ -75,7 +75,7 @@ class Segments : public pipeline::Data {
 	typedef SegmentVectorAdaptor<EndSegment>          EndSegmentVectorAdaptor;
 	typedef SegmentVectorAdaptor<ContinuationSegment> ContinuationSegmentVectorAdaptor;
 	typedef SegmentVectorAdaptor<BranchSegment>       BranchSegmentVectorAdaptor;
-	typedef SegmentVectorAdaptor<SegmentPair>       SegmentPairVectorAdaptor;
+	typedef SegmentVectorAdaptor<SegmentPair>         SegmentPairVectorAdaptor;
 
 	// nanoflann kd-tree types for each segment type
 	typedef nanoflann::KDTreeSingleIndexAdaptor<
@@ -94,10 +94,10 @@ class Segments : public pipeline::Data {
 			2>
 			BranchSegmentKdTree;
 	typedef nanoflann::KDTreeSingleIndexAdaptor<
-				nanoflann::L2_Simple_Adaptor<double, SegmentPairVectorAdaptor>,
-				SegmentPairVectorAdaptor,
-				2>
-				SegmentPairKdTree;
+			nanoflann::L2_Simple_Adaptor<double, SegmentPairVectorAdaptor>,
+			SegmentPairVectorAdaptor,
+			2>
+			SegmentPairKdTree;
 
 public:
 
