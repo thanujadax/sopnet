@@ -74,17 +74,28 @@ ProblemAssembler::updateOutputs() {
 
 	// make sure synapses are enclosed by a single neuron
 	addSynapseConstraints();
+
+	// make sure each segmentPair is bound to the corresponding pair of segments
+	addSegmentPairConstraints();
 }
 
 void
 ProblemAssembler::extractSegmentPairs() {
-
 
 	// 	For each adjacent pair of intervals,
 	// 		for each slice
 	// 			each pair of segments on either side of that slice
 	// populate _allSegmentPairs
 
+	_segmentPairExtractorPipeline = boost::make_shared<SegmentPairExtractionPipeline> ( \
+			_neuronSlices.getSharedPointer(), _allSegments->getContinuations(), \
+			_forceExplanation, finishLastSection);
+
+	for (unsigned int i = 0; i < _segmentPairExtractorPipeline->numIntervals(); i++) {
+		// add segment pairs
+		boost::shared_ptr<Segments> segments = _segmentPairExtractorPipeline->getSegments(i);
+		_allSegmentPairs->addAll(segments);
+	}
 }
 
 void
@@ -315,6 +326,55 @@ ProblemAssembler::mapConstraints(boost::shared_ptr<LinearConstraints> linearCons
 	}
 }
 
+
+void
+ProblemAssembler::addSegmentPairConstraints() {
+	LOG_DEBUG(problemassemblerlog) << "adding segment-pair constraints..." << std::endl;
+
+	/* Get a map from slice ids to slice numbers in [0, numSlices-1]. We need this
+	 * map to find the correct linear constraint for each slice.
+	 */
+	extractSliceIdsMap();
+
+	_numSegments = 0;
+
+	/* Make sure that the number of accepted segments having a certain slice at
+	 * the right side is equal to the number of accepted segments having this
+	 * slice on the left side.
+	 *
+	 * For this, we add the following linear constraint for every slice:
+	 *
+	 * [sum of segments with slice right] - [sum of segments with slice left] = 0
+	 */
+
+	// allocate a set of linear constraints
+	_consistencyConstraints = LinearConstraints(_numSlices);
+
+	// set the relation and value
+	foreach (LinearConstraint& constraint, _consistencyConstraints) {
+
+		constraint.setValue(0);
+		constraint.setRelation(Equal);
+	}
+
+	// set the coefficients
+	foreach (boost::shared_ptr<EndSegment> segment, _allSegments->getEnds())
+		setCoefficient(*segment);
+
+	foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations())
+		setCoefficient(*segment);
+
+	foreach (boost::shared_ptr<BranchSegment> segment, _allSegments->getBranches())
+		setCoefficient(*segment);
+
+	LOG_DEBUG(problemassemblerlog) << "created " << _consistencyConstraints.size() << " linear constraints" << std::endl;
+
+	foreach (const LinearConstraint& constraint, _consistencyConstraints)
+		LOG_ALL(problemassemblerlog) << constraint << std::endl;
+
+	_allLinearConstraints->addAll(_consistencyConstraints);
+}
+
 void
 ProblemAssembler::setCoefficient(const EndSegment& end) {
 
@@ -417,6 +477,9 @@ ProblemAssembler::extractSliceIdsMap() {
 		addSlices(*segment);
 
 	foreach (boost::shared_ptr<BranchSegment> segment, _allSegments->getBranches())
+		addSlices(*segment);
+
+	foreach (boost::shared_ptr<SegmentPair> segment, _allSegments->getSegmentPairs())
 		addSlices(*segment);
 }
 
@@ -528,9 +591,6 @@ ProblemAssembler::extractSynapseEnclosingNeuronSegments() {
 }
 
 void
-ProblemAssembler::extractSegmentPairs() {
-
-}
 
 bool
 ProblemAssembler::encloses(boost::shared_ptr<Segment> neuronSegment, boost::shared_ptr<Segment> otherSegment, double enclosingThreshold) {
