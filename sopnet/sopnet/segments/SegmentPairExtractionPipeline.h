@@ -5,8 +5,8 @@
  *      Author: thanuja
  */
 
-#ifndef SOPNET_SEGMENTPAIREXTRACTIONPIPELINE_H_
-#define SOPNET_SEGMENTPAIREXTRACTIONPIPELINE_H_
+#ifndef SOPNET_SEGMENTS_SEGMENTPAIREXTRACTIONPIPELINE_H_
+#define SOPNET_SEGMENTS_SEGMENTPAIREXTRACTIONPIPELINE_H_
 
 #include <vector>
 #include <string>
@@ -28,10 +28,11 @@ class SegmentPairExtractionPipeline {
 
 public:
 
-	SegmentPairExtractionPipeline(boost::shared_ptr<ImageStack> imageStack, \
-			boost::shared_ptr<Segments> segments, \
-			pipeline::Value<bool> forceExplanation, \
-			bool finishLastInterval = false);
+	SegmentPairExtractionPipeline(
+			boost::shared_ptr<ImageStack> neuronSlices,
+			boost::shared_ptr<Segments> continuationSegments,
+			pipeline::Value<bool> forceExplanation, bool finishLastInterval =
+					false);
 
 	/**
 	 * Get the extracted segments in the given interval.
@@ -46,11 +47,18 @@ public:
 	/**
 	 * Get the number of intervals for which the pipeline was created.
 	 */
-	unsigned int numIntervals() const { return _segmentPairExtractors.size(); }
+	unsigned int numIntervals() const {
+		return _segmentPairExtractors.size();
+	}
 
 private:
 
 	void create();
+
+	// neuron slices
+	boost::shared_ptr<ImageStack> _neuronSlices;
+	// already extracted continuation segments
+	boost::shared_ptr<Segments> _continuationSegments;
 
 	// the segment extractors for each interval
 	std::vector<boost::shared_ptr<SegmentExtractor> > _segmentPairExtractors;
@@ -62,6 +70,5 @@ private:
 
 };
 
+#endif /* SOPNET_SEGMENTS_SEGMENTPAIREXTRACTIONPIPELINE_H_ */
 
-
-#endif /* SOPNET_SEGMENTPAIREXTRACTIONPIPELINE_H_ */

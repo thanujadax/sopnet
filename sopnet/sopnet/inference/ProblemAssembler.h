@@ -6,6 +6,7 @@
 #include <sopnet/features/Overlap.h>
 #include <sopnet/segments/Segments.h>
 #include "ProblemConfiguration.h"
+#include <sopnet/segments/SegmentPairExtractionPipeline.h>
 
 class ProblemAssembler : public pipeline::SimpleProcessNode<> {
 
@@ -153,6 +154,9 @@ private:
 	// min ratio of overlap to size to consider a mitochondria or synapse 
 	// segment to be enclosed by a neuron segment
 	double _enclosingSynapseThreshold;
+
+	// internal pipeline to extract segment pairs
+	boost::shared_ptr<SegmentPairExtractionPipeline>      	_segmentPairExtractorPipeline;
 };
 
 #endif // CELLTRACKER_PROBLEM_ASSEMBLER_H__

@@ -35,4 +35,3 @@ private:
 };
 
 #endif /* SOPNET_SEGMENTPAIR_H_ */
-

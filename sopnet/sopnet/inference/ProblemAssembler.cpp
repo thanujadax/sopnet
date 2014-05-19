@@ -3,6 +3,7 @@
 #include <sopnet/segments/EndSegment.h>
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
+#include <sopnet/segments/SegmentPair.h>
 #include "ProblemAssembler.h"
 
 util::ProgramOption optionMaxMitochondriaNeuronDistance(

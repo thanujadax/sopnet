@@ -96,6 +96,7 @@ Sopnet::Sopnet(
 	registerInput(_priorCostFunctionParameters, "prior cost parameters");
 	registerInput(_forceExplanation, "force explanation");
 
+
 	// tell the outside world what we've got
 	registerOutput(_reconstructor->getOutput(), "solution");
 	registerOutput(_problemAssembler->getOutput("segments"), "segments");
