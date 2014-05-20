@@ -26,7 +26,14 @@ private:
 
 	void updateOutputs();
 
-	void extractSegmentPairs();
+	void extractSegmentPairsAll();
+
+	void extractSegmentPairs(boost::shared_ptr<ContinuationSegment> segment);
+
+	void addNextSegmentPair(
+			Direction direction,
+			boost::shared_ptr<ContinuationSegment> segment1,
+			boost::shared_ptr<ContinuationSegment> segment2);
 
 	// list of all continuation segments
 	pipeline::Inputs<Segments>          _allSegments;
