@@ -7,6 +7,7 @@
 #include <sopnet/inference/PriorCostFunctionParameters.h>
 #include <sopnet/inference/SegmentationCostFunctionParameters.h>
 #include <sopnet/segments/SegmentExtractionPipeline.h>
+#include <sopnet/segments/SegmentPairExtractor.h>
 
 // forward declarations
 class GoldStandardExtractor;
@@ -27,6 +28,7 @@ class SegmentFeaturesExtractor;
 class SegmentRandomForestTrainer;
 class SegmentationCostFunction;
 class StructuredProblemWriter;
+class SegmentPairExtractor;
 template <typename Precision> class SliceExtractor;
 
 class Sopnet : public pipeline::SimpleProcessNode<> {
@@ -113,6 +115,9 @@ private:
 
 	// the problem assembler that collects all segments and linear constraints
 	boost::shared_ptr<ProblemAssembler>               	_problemAssembler;
+
+	// to create segment pairs using continuationSegments going through the same slice from one interval to the other
+	boost::shared_ptr<SegmentPairExtractor>              _segmentPairExtractor;
 
 	/*
 	 * inference part

@@ -20,8 +20,6 @@ public:
 
 	SegmentPairExtractor();
 
-
-
 private:
 
 	void updateOutputs();
