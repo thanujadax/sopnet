@@ -87,7 +87,7 @@ private:
 	pipeline::Inputs<LinearConstraints> _synapseLinearConstraints;
 
 	// all segment pairs in the problem
-	pipeline::Inputs<Segments>          _segmentPairs;
+	pipeline::Input<Segments>          _segmentPairs;
 
 	// all segments in the problem
 	pipeline::Output<Segments>          _allSegments;

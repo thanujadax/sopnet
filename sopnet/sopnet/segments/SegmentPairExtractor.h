@@ -8,8 +8,12 @@
 #ifndef SOPNET_SEGMENTS_SEGMENTPAIREXTRACTOR_H_
 #define SOPNET_SEGMENTS_SEGMENTPAIREXTRACTOR_H_
 
+#include <boost/function.hpp>
+
 #include <pipeline/all.h>
 #include <sopnet/segments/Segments.h>
+#include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/ContinuationSegment.h>
 
 /*
  *
@@ -34,7 +38,7 @@ private:
 			boost::shared_ptr<ContinuationSegment> segment2);
 
 	// list of all continuation segments
-	pipeline::Inputs<Segments>          _allSegments;
+	pipeline::Input<Segments>          _segments;
 
 	// list of all segment pairs
 	pipeline::Output<Segments>          _segmentPairs;

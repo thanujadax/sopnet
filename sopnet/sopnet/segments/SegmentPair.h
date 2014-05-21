@@ -11,9 +11,6 @@
 #include "Segment.h"
 #include "ContinuationSegment.h"
 
-// forward declarations
-class ContinuationSegment;
-
 class SegmentPair: public Segment {
 
 public:
@@ -25,6 +22,8 @@ public:
 	boost::shared_ptr<ContinuationSegment> getContinuationSegment1() const;
 
 	boost::shared_ptr<ContinuationSegment> getContinuationSegment2() const;
+
+	std::vector<boost::shared_ptr<Slice> > getSlices() const;
 
 private:
 

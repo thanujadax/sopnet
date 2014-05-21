@@ -8,11 +8,12 @@
 #include "SegmentPairExtractor.h"
 
 
+
 SegmentPairExtractor::SegmentPairExtractor() :
 
 	_segmentPairs(new Segments()){
 
-	registerInputs(_allSegments, "segments");
+	registerInput(_segments, "segments");
 
 	registerOutput(_segmentPairs, "segment pairs");
 
@@ -28,7 +29,7 @@ SegmentPairExtractor::updateOutputs(){
 void
 SegmentPairExtractor::extractSegmentPairsAll(){
 
-	foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations()) {
+	foreach (boost::shared_ptr<ContinuationSegment> segment, _segments->getContinuations() ) {
 		extractSegmentPairs(segment);
 		}
 }
@@ -43,7 +44,7 @@ SegmentPairExtractor::extractSegmentPairs(boost::shared_ptr<ContinuationSegment>
 	unsigned int nextInterSectionInterval = segment->getInterSectionInterval() + 1;
 
 	// get all segments in the next interSectionInterval, continuing from this segment
-	boost::shared_ptr<Segments> nextIntervalContinuationSegments = _allSegments->getContinuations(nextInterSectionInterval);
+	std::vector<boost::shared_ptr<ContinuationSegment> > nextIntervalContinuationSegments = _segments->getContinuations(nextInterSectionInterval);
 
 	foreach(boost::shared_ptr<ContinuationSegment> nextSegment, nextIntervalContinuationSegments){
 		if (segment->getDirection()==Left){

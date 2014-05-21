@@ -47,7 +47,7 @@ ProblemAssembler::ProblemAssembler() :
 	registerInputs(_mitochondriaLinearConstraints, "mitochondria linear constraints");
 	registerInputs(_synapseSegments, "synapse segments");
 	registerInputs(_synapseLinearConstraints, "synapse linear constraints");
-	registerInputs(_segmentPairs, "segment pairs");
+	registerInput(_segmentPairs, "segment pairs");
 
 	registerOutput(_allSegments, "segments");
 	registerOutput(_allNeuronSegments, "neuron segments");
@@ -112,11 +112,8 @@ ProblemAssembler::collectSegments() {
 		_numSynapseSegments += segments->size();
 	}
 
-	foreach (boost::shared_ptr<Segments> segments, _segmentPairs) {
-
-		_allSegments->addAll(segments);
-		_numSegmentPairs += segments->size();
-	}
+	_allSegments->addAll(_segmentPairs);
+	_numSegmentPairs += _segmentPairs->size();
 
 	LOG_DEBUG(problemassemblerlog) << "collected " << _allSegments->size() << " segments" << std::endl;
 }
@@ -529,8 +526,6 @@ ProblemAssembler::extractSynapseEnclosingNeuronSegments() {
 				_synapseEnclosingNeuronSegments[synapseSegmentId].push_back(branch->getId());
 	}
 }
-
-void
 
 bool
 ProblemAssembler::encloses(boost::shared_ptr<Segment> neuronSegment, boost::shared_ptr<Segment> otherSegment, double enclosingThreshold) {

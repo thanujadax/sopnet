@@ -185,6 +185,7 @@ Sopnet::createBasicPipeline() {
 		_synapseSegmentExtractorPipeline = boost::make_shared<SegmentExtractionPipeline>(_synapseSlices.getSharedPointer(), false, finishLastSection);
 
 	LOG_DEBUG(sopnetlog) << "creating segment pair extraction part..." << std::endl;
+
 	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 	_segmentPairExtractor->setInput("segments", _problemAssembler->getOutput("segments"));
 
