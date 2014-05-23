@@ -89,6 +89,9 @@ private:
 	// all segment pairs in the problem
 	pipeline::Input<Segments>          _segmentPairs;
 
+	// segment pair linear constraints for the entire set of segment pairs in the problem
+	pipeline::Input<LinearConstraints> _segmentPairLinearConstraints;
+
 	// all segments in the problem
 	pipeline::Output<Segments>          _allSegments;
 

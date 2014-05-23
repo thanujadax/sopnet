@@ -186,8 +186,9 @@ Sopnet::createBasicPipeline() {
 
 	LOG_DEBUG(sopnetlog) << "creating segment pair extraction part..." << std::endl;
 
-	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 	_segmentPairExtractor->setInput("segments", _problemAssembler->getOutput("segments"));
+	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+
 
 	LOG_DEBUG(sopnetlog) << "feeding output into problem assembler..." << std::endl;
 

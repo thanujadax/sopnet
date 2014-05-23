@@ -48,6 +48,7 @@ ProblemAssembler::ProblemAssembler() :
 	registerInputs(_synapseSegments, "synapse segments");
 	registerInputs(_synapseLinearConstraints, "synapse linear constraints");
 	registerInput(_segmentPairs, "segment pairs");
+	registerInput(_segmentPairLinearConstraints, "segment pair linear constraints");
 
 	registerOutput(_allSegments, "segments");
 	registerOutput(_allNeuronSegments, "neuron segments");
@@ -113,7 +114,7 @@ ProblemAssembler::collectSegments() {
 	}
 
 	_allSegments->addAll(_segmentPairs);
-	_numSegmentPairs += _segmentPairs->size();
+	_numSegmentPairs = _segmentPairs->size();
 
 	LOG_DEBUG(problemassemblerlog) << "collected " << _allSegments->size() << " segments" << std::endl;
 }
@@ -159,6 +160,9 @@ ProblemAssembler::addExplanationConstraints() {
 		setCoefficient(*segment);
 
 	foreach (boost::shared_ptr<BranchSegment> segment, _allSegments->getBranches())
+		setCoefficient(*segment);
+
+	foreach (boost::shared_ptr<SegmentPair> segment, _allSegments->getSegmentPairs())
 		setCoefficient(*segment);
 
 	LOG_DEBUG(problemassemblerlog) << "created " << _consistencyConstraints.size() << " linear constraints" << std::endl;
@@ -309,9 +313,8 @@ void
 ProblemAssembler::addSegmentPairConstraints() {
 	LOG_DEBUG(problemassemblerlog) << "adding segment-pair constraints..." << std::endl;
 
-	_numSegments = 0;
-
-	// TODO: segment pair constraints
+	foreach (boost::shared_ptr<LinearConstraints> linearConstraints, _segmentPairLinearConstraints)
+		mapConstraints(linearConstraints);
 }
 
 void
@@ -396,6 +399,19 @@ ProblemAssembler::setCoefficient(const BranchSegment& branch) {
 	 * reconstruct the result.
 	 */
 	_problemConfiguration->setVariable(branch, _numSegments);
+
+	_numSegments++;
+}
+
+void
+ProblemAssembler::setCoefficient(const SegmentPair& segmentPair) {
+
+	/* Sneakily we assigned a variable number (_numSegments) to every
+	 * segment we found. Remember this mapping -- we will need it to
+	 * transform the linear constraints on the segments and to
+	 * reconstruct the result.
+	 */
+	_problemConfiguration->setVariable(segmentPair, _numSegments);
 
 	_numSegments++;
 }
