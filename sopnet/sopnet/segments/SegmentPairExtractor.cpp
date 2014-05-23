@@ -107,7 +107,7 @@ SegmentPairExtractor::assembleLinearConstraints(){
 	 */
 
 
-	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segmentPairs){
+	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segmentPairs->getSegmentPairs()){
 
 		// constraint 1
 		assembleLinearConstraint(segmentPair,1.0,-1.0,-1.0,GreaterEqual,-1.0);

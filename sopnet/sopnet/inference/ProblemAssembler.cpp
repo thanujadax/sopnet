@@ -313,8 +313,7 @@ void
 ProblemAssembler::addSegmentPairConstraints() {
 	LOG_DEBUG(problemassemblerlog) << "adding segment-pair constraints..." << std::endl;
 
-	foreach (boost::shared_ptr<LinearConstraints> linearConstraints, _segmentPairLinearConstraints)
-		mapConstraints(linearConstraints);
+	 mapConstraints(_segmentPairLinearConstraints);
 }
 
 void
