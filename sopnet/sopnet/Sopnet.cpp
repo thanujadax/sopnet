@@ -80,6 +80,7 @@ Sopnet::Sopnet(
 	_spWriter(boost::make_shared<StructuredProblemWriter>()),
 	_projectDirectory(projectDirectory),
 	_problemWriter(problemWriter),
+	_segmentPairExtractor(boost::make_shared<SegmentPairExtractor>()),
 	_pipelineCreated(false) {
 
 	// tell the outside world what we need
@@ -95,6 +96,7 @@ Sopnet::Sopnet(
 	registerInput(_segmentationCostFunctionParameters, "segmentation cost parameters");
 	registerInput(_priorCostFunctionParameters, "prior cost parameters");
 	registerInput(_forceExplanation, "force explanation");
+
 
 	// tell the outside world what we've got
 	registerOutput(_reconstructor->getOutput(), "solution");
@@ -155,6 +157,7 @@ Sopnet::createBasicPipeline() {
 	_problemAssembler->clearInputs("mitochondria linear constraints");
 	_problemAssembler->clearInputs("synapse segments");
 	_problemAssembler->clearInputs("synapse linear constraints");
+	_problemAssembler->clearInputs("segment pairs");
 
 	bool finishLastSection = !_problemWriter;
 
@@ -180,6 +183,12 @@ Sopnet::createBasicPipeline() {
 		_synapseSegmentExtractorPipeline = boost::make_shared<SegmentExtractionPipeline>(_synapseSliceStackDirectories.getSharedPointer(), finishLastSection);
 	else if (_synapseSlices.isSet())
 		_synapseSegmentExtractorPipeline = boost::make_shared<SegmentExtractionPipeline>(_synapseSlices.getSharedPointer(), false, finishLastSection);
+
+	LOG_DEBUG(sopnetlog) << "creating segment pair extraction part..." << std::endl;
+
+	_segmentPairExtractor->setInput("segments", _problemAssembler->getOutput("segments"));
+	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+
 
 	LOG_DEBUG(sopnetlog) << "feeding output into problem assembler..." << std::endl;
 

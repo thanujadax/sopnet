@@ -34,3 +34,13 @@ SegmentPair::getContinuationSegment2() const {
 	return _continuationSegment2;
 }
 
+std::vector<boost::shared_ptr<Slice> >
+SegmentPair::getSlices() const {
+
+	std::vector<boost::shared_ptr<Slice> > slices;
+
+	//slices.push_back(getSlice());
+
+	return slices;
+}
+

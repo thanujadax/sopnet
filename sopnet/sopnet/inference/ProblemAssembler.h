@@ -53,8 +53,6 @@ private:
 
 	void extractSynapseEnclosingNeuronSegments();
 
-	void extractSegmentPairs();
-
 	bool encloses(
 			boost::shared_ptr<Segment> neuronSegment,
 			boost::shared_ptr<Segment> otherSegment,
@@ -88,6 +86,12 @@ private:
 	// synapse linear constraints on the segments for each pair of frames
 	pipeline::Inputs<LinearConstraints> _synapseLinearConstraints;
 
+	// all segment pairs in the problem
+	pipeline::Input<Segments>          _segmentPairs;
+
+	// segment pair linear constraints for the entire set of segment pairs in the problem
+	pipeline::Input<LinearConstraints> _segmentPairLinearConstraints;
+
 	// all segments in the problem
 	pipeline::Output<Segments>          _allSegments;
 
@@ -99,9 +103,6 @@ private:
 
 	// all synapse segments in the problem
 	pipeline::Output<Segments>          _allSynapseSegments;
-
-	// all segment pairs in the problem
-	pipeline::Output<Segments>          _allSegmentPairs;
 
 	// all linear constraints on all segments
 	pipeline::Output<LinearConstraints> _allLinearConstraints;
@@ -153,6 +154,7 @@ private:
 	// min ratio of overlap to size to consider a mitochondria or synapse 
 	// segment to be enclosed by a neuron segment
 	double _enclosingSynapseThreshold;
+
 };
 
 #endif // CELLTRACKER_PROBLEM_ASSEMBLER_H__
