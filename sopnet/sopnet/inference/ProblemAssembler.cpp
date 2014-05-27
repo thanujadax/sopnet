@@ -138,12 +138,15 @@ ProblemAssembler::collectSegmentPairs(){
 //	_numSegmentPairs = _segmentPairs->size();
 
 //	_allSegments->addAll(_segmentPairs);
-	_allSegments->addAll(_segmentPairExtractor->getOutput("segment pairs"));
+
+	// _segmentPairs = _segmentPairExtractor->getOutput("segment pairs").getSharedDataPointer();
+	_segmentPairs = &_segmentPairExtractor->getOutput("segment pairs");
+	_allSegments->addAll(_segmentPairs);
 
 	LOG_DEBUG(problemassemblerlog) << "collected " << _allSegments->size() << " segments, with segment pairs" << std::endl;
 
 	// get segment pair linear constraints
-	_segmentPairLinearConstraints->addAll(_segmentPairExtractor->getOutput("segment pair linear constraints"));
+	_segmentPairLinearConstraints = &_segmentPairExtractor->getOutput("segment pair linear constraints");
 
 
 }
