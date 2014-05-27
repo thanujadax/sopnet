@@ -37,7 +37,8 @@ SegmentPairFeatureExtractor::updateOutputs(){
 
     _features->clear();
 
-    _features->addName("2nd segment relative offset");
+    _features->addName("sp 2nd segment relative offset");
+    _features->addName("sp 2nd derivative of size");
 
     foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
                     computeFeatures(*segment, _features->get(segment->getId()));
