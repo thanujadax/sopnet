@@ -34,6 +34,7 @@ SegmentPairExtractor::extractSegmentPairsAll(){
 	foreach (boost::shared_ptr<ContinuationSegment> segment, _segments->getContinuations() ) {
 		extractSegmentPairs(segment);
 		}
+
 }
 
 void

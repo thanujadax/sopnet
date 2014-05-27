@@ -6,7 +6,6 @@
 #include "EndSegment.h"
 #include "ContinuationSegment.h"
 #include "BranchSegment.h"
-#include "BranchSegment.h"
 #include "SegmentExtractor.h"
 
 static logger::LogChannel segmentextractorlog("segmentextractorlog", "[SegmentExtractor] ");
