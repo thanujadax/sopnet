@@ -80,7 +80,8 @@ SegmentPairFeatureExtractor::getRelativeOffset(
 		const boost::shared_ptr<Slice> slice2,
 		const boost::shared_ptr<Slice> slice3){
 
-	double offset, x1, x2, y1, y2, x3, y3;
+	double offset, x1, x2, y1, y2, x3, y3, dz;
+	dz = 10; // relative resolution in z direction
 
 
 	x1 = slice1->getComponent()->getCenter().x;
@@ -93,8 +94,8 @@ SegmentPairFeatureExtractor::getRelativeOffset(
 	y3 = slice3->getComponent()->getCenter().y;
 
 	offset = acos(
-			((x2-x1)*(x3-x2)+(y2-y1)*(y3-y2)) /
-			(sqrt(pow((x2-x1),2)+pow((y2-y1),2))*sqrt(pow((x3-x2),2)+pow((y3-y2),2)))
+			((x2-x1)*(x3-x2)+(y2-y1)*(y3-y2)+dz*dz) /
+			(sqrt(pow((x2-x1),2)+pow((y2-y1),2)+pow(dz,2))*sqrt(pow((x3-x2),2)+pow((y3-y2),2)+pow(dz,2)))
 			);
 
 	return offset;
