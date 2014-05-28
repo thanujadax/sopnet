@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <math.h>
+#include <cmath>
 
 #include <boost/filesystem.hpp>
 
@@ -35,14 +36,15 @@ SegmentPairFeatureExtractor::updateOutputs(){
 
     LOG_DEBUG(segmentpairfeatureextractorlog) << "extracting features" << std::endl;
 
-    unsigned int numSegmentPairFeatures = 2;
+    unsigned int numSegmentPairFeatures = 3;
 
     _features->clear();
 
-    _features->resize(_segments->getSegmentPairs().size(), numSegmentPairFeatures);
+    _features->resize(_segments->size(), numSegmentPairFeatures);
 
     _features->addName("sp 2nd segment relative offset");
     _features->addName("sp 2nd derivative of size");
+    _features->addName("sp 2nd derivative of size abs");
 
     foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
                     computeFeatures(segment, _features->get(segment->getId()));
@@ -74,9 +76,39 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair
 	else
 		slice3 = segment2->getSourceSlice();
 
-
+	// TODO:
+	// fill zeros for feature[0] to feature[numEnds+numContinuations+numBranches -1]
+	// start with feature[numEnds+numContinuations+numBranches] instead of features[0]
 	features[0] = getRelativeOffset(slice1,slice2,slice3);
 	features[1] = getD2Area(slice1,slice2,slice3);
+	features[2] = abs (features[1]);
+}
+
+void
+SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment> end, std::vector<double>& features){
+
+
+	features[0] = Features::NoFeatureValue;
+	features[1] = Features::NoFeatureValue;
+	features[2] = Features::NoFeatureValue;
+}
+
+void
+SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<ContinuationSegment> continuation, std::vector<double>& features){
+
+
+	features[0] = Features::NoFeatureValue;
+	features[1] = Features::NoFeatureValue;
+	features[2] = Features::NoFeatureValue;
+}
+
+void
+SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegment> branch, std::vector<double>& features){
+
+
+	features[0] = Features::NoFeatureValue;
+	features[1] = Features::NoFeatureValue;
+	features[2] = Features::NoFeatureValue;
 }
 
 double
