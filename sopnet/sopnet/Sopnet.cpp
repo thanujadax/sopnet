@@ -67,6 +67,7 @@ util::ProgramOption optionDecomposeProblem(
 Sopnet::Sopnet(
 		const std::string& projectDirectory,
 		boost::shared_ptr<ProcessNode> problemWriter) :
+	_segmentPairExtractor(boost::make_shared<SegmentPairExtractor>()),
 	_problemAssembler(boost::make_shared<ProblemAssembler>()),
 	_segmentFeaturesExtractor(boost::make_shared<SegmentFeaturesExtractor>()),
 	_randomForestReader(boost::make_shared<RandomForestHdf5Reader>(optionRandomForestFile.as<std::string>())),
@@ -157,6 +158,9 @@ Sopnet::createBasicPipeline() {
 	_problemAssembler->clearInputs("synapse segments");
 	_problemAssembler->clearInputs("synapse linear constraints");
 
+	_segmentPairExtractor->clearInputs("neuron segments");
+	_segmentPairExtractor->clearInputs("mitochondria segments");
+	_segmentPairExtractor->clearInputs("synapse segments");
 
 	bool finishLastSection = !_problemWriter;
 
@@ -192,18 +196,29 @@ Sopnet::createBasicPipeline() {
 		_problemAssembler->addInput("neuron segments", _neuronSegmentExtractorPipeline->getSegments(i));
 		_problemAssembler->addInput("neuron linear constraints", _neuronSegmentExtractorPipeline->getConstraints(i));
 
+		_segmentPairExtractor->addInput("neuron segments", _neuronSegmentExtractorPipeline->getSegments(i));
+
 		if (_mitochondriaSegmentExtractorPipeline) {
 
 			_problemAssembler->addInput("mitochondria segments", _mitochondriaSegmentExtractorPipeline->getSegments(i));
 			_problemAssembler->addInput("mitochondria linear constraints", _mitochondriaSegmentExtractorPipeline->getConstraints(i));
+
+			_segmentPairExtractor->addInput("mitochondria segments", _mitochondriaSegmentExtractorPipeline->getSegments(i));
+
 		}
 
 		if (_synapseSegmentExtractorPipeline) {
 
 			_problemAssembler->addInput("synapse segments", _synapseSegmentExtractorPipeline->getSegments(i));
 			_problemAssembler->addInput("synapse linear constraints", _synapseSegmentExtractorPipeline->getConstraints(i));
+
+			_segmentPairExtractor->addInput("synapse segments", _synapseSegmentExtractorPipeline->getSegments(i));
 		}
 	}
+
+	// add segment pairs from segmentPairExtractor, to problemAssembler
+	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+	_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
 
 
 	if (_groundTruth.isSet())

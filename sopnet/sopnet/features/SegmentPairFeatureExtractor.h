@@ -24,7 +24,7 @@ private:
 
     void updateOutputs();
 
-	void computeFeatures(const SegmentPair& segmentPair, std::vector<double>& features);
+	void computeFeatures(const boost::shared_ptr<SegmentPair> segmentPair, std::vector<double>& features);
 
 	double getRelativeOffset(
 			const boost::shared_ptr<Slice> slice1,

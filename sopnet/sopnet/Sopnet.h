@@ -7,6 +7,8 @@
 #include <sopnet/inference/PriorCostFunctionParameters.h>
 #include <sopnet/inference/SegmentationCostFunctionParameters.h>
 #include <sopnet/segments/SegmentExtractionPipeline.h>
+#include <sopnet/segments/SegmentPairExtractor.h>
+
 
 // forward declarations
 class GoldStandardExtractor;
@@ -112,8 +114,11 @@ private:
 
 	boost::shared_ptr<SegmentExtractionPipeline>      	_synapseSegmentExtractorPipeline;
 
+	boost::shared_ptr<SegmentPairExtractor>      		_segmentPairExtractor;
+
 	// the problem assembler that collects all segments and linear constraints
 	boost::shared_ptr<ProblemAssembler>               	_problemAssembler;
+
 
 	/*
 	 * inference part

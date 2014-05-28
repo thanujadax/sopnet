@@ -35,13 +35,17 @@ SegmentPairFeatureExtractor::updateOutputs(){
 
     LOG_DEBUG(segmentpairfeatureextractorlog) << "extracting features" << std::endl;
 
+    unsigned int numSegmentPairFeatures = 2;
+
     _features->clear();
+
+    _features->resize(_segments->getSegmentPairs().size(), numSegmentPairFeatures);
 
     _features->addName("sp 2nd segment relative offset");
     _features->addName("sp 2nd derivative of size");
 
     foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
-                    computeFeatures(*segment, _features->get(segment->getId()));
+                    computeFeatures(segment, _features->get(segment->getId()));
 
     LOG_ALL(segmentpairfeatureextractorlog) << "found features: " << *_features << std::endl;
 
@@ -49,10 +53,10 @@ SegmentPairFeatureExtractor::updateOutputs(){
 }
 
 void
-SegmentPairFeatureExtractor::computeFeatures(const SegmentPair& segmentPair, std::vector<double>& features){
+SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair> segmentPair, std::vector<double>& features){
 
-	boost::shared_ptr<ContinuationSegment> segment1 = segmentPair.getContinuationSegment1();
-	boost::shared_ptr<ContinuationSegment> segment2 = segmentPair.getContinuationSegment2();
+	boost::shared_ptr<ContinuationSegment> segment1 = segmentPair->getContinuationSegment1();
+	boost::shared_ptr<ContinuationSegment> segment2 = segmentPair->getContinuationSegment2();
 
 	boost::shared_ptr<Slice> slice1, slice2, slice3;
 
@@ -70,6 +74,7 @@ SegmentPairFeatureExtractor::computeFeatures(const SegmentPair& segmentPair, std
 	else
 		slice3 = segment2->getSourceSlice();
 
+
 	features[0] = getRelativeOffset(slice1,slice2,slice3);
 	features[1] = getD2Area(slice1,slice2,slice3);
 }
@@ -81,8 +86,7 @@ SegmentPairFeatureExtractor::getRelativeOffset(
 		const boost::shared_ptr<Slice> slice3){
 
 	double offset, x1, x2, y1, y2, x3, y3, dz;
-	dz = 10; // relative resolution in z direction
-
+	dz = 10.0; // relative resolution in z direction
 
 	x1 = slice1->getComponent()->getCenter().x;
 	y1 = slice1->getComponent()->getCenter().y;

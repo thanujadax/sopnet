@@ -11,10 +11,13 @@
 static logger::LogChannel segmentpairextractorlog("segmentpairextractorlog", "[SegmentPairExtractor] ");
 
 SegmentPairExtractor::SegmentPairExtractor() :
+	_segmentPairs(new Segments()),
+	_linearConstraints(new LinearConstraints),
+	_allSegments(boost::make_shared<Segments>()){
 
-	_segmentPairs(new Segments()){
-
-	registerInput(_segments, "segments");
+    registerInputs(_neuronSegments, "neuron segments");
+    registerInputs(_mitochondriaSegments, "mitochondria segments");
+    registerInputs(_synapseSegments, "synapse segments");
 
 	registerOutput(_segmentPairs, "segment pairs");
 	registerOutput(_linearConstraints,"segment pair linear constraints");
@@ -24,14 +27,45 @@ SegmentPairExtractor::SegmentPairExtractor() :
 void
 SegmentPairExtractor::updateOutputs(){
 
+	collectSegments();
 	extractSegmentPairsAll();
+	assembleLinearConstraints();
 
+
+}
+
+void
+SegmentPairExtractor::collectSegments() {
+
+        LOG_DEBUG(segmentpairextractorlog) << "collecting segments..." << std::endl;
+
+        _allSegments->clear();
+
+        foreach (boost::shared_ptr<Segments> segments, _neuronSegments) {
+
+                _allSegments->addAll(segments);
+
+        }
+
+        foreach (boost::shared_ptr<Segments> segments, _mitochondriaSegments) {
+
+                _allSegments->addAll(segments);
+
+        }
+
+        foreach (boost::shared_ptr<Segments> segments, _synapseSegments) {
+
+                _allSegments->addAll(segments);
+
+        }
+
+        LOG_DEBUG(segmentpairextractorlog) << "collected " << _allSegments->size() << " segments" << std::endl;
 }
 
 void
 SegmentPairExtractor::extractSegmentPairsAll(){
 
-	foreach (boost::shared_ptr<ContinuationSegment> segment, _segments->getContinuations() ) {
+	foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations() ) {
 		extractSegmentPairs(segment);
 		}
 
@@ -41,13 +75,12 @@ void
 SegmentPairExtractor::extractSegmentPairs(boost::shared_ptr<ContinuationSegment> segment){
 
 	// for this segment, extract all possible segment pairs that continue from its target slice
-	// in the same direction
 
 	// get interSectionInterval
 	unsigned int nextInterSectionInterval = segment->getInterSectionInterval() + 1;
 
 	// get all segments in the next interSectionInterval, continuing from this segment
-	std::vector<boost::shared_ptr<ContinuationSegment> > nextIntervalContinuationSegments = _segments->getContinuations(nextInterSectionInterval);
+	std::vector<boost::shared_ptr<ContinuationSegment> > nextIntervalContinuationSegments = _allSegments->getContinuations(nextInterSectionInterval);
 
 	foreach(boost::shared_ptr<ContinuationSegment> nextSegment, nextIntervalContinuationSegments){
 		if (segment->getDirection()==Left){

@@ -39,10 +39,7 @@ ProblemAssembler::ProblemAssembler() :
 	_allSynapseSegments(new Segments()),
 	_allLinearConstraints(new LinearConstraints()),
 	_problemConfiguration(new ProblemConfiguration()),
-	_overlap(false, false),
-	_segmentPairExtractor(boost::make_shared<SegmentPairExtractor>()),
-	_segmentPairs(new Segments()),
-	_segmentPairLinearConstraints(new LinearConstraints()){
+	_overlap(false, false){
 
 	registerInputs(_neuronSegments, "neuron segments");
 	registerInputs(_neuronLinearConstraints, "neuron linear constraints");
@@ -50,6 +47,8 @@ ProblemAssembler::ProblemAssembler() :
 	registerInputs(_mitochondriaLinearConstraints, "mitochondria linear constraints");
 	registerInputs(_synapseSegments, "synapse segments");
 	registerInputs(_synapseLinearConstraints, "synapse linear constraints");
+	registerInput(_segmentPairs, "segment pairs");
+	registerInput(_segmentPairLinearConstraints, "segment pair linear constraints");
 
 	registerOutput(_allSegments, "segments");
 	registerOutput(_allNeuronSegments, "neuron segments");
@@ -124,29 +123,8 @@ ProblemAssembler::collectSegmentPairs(){
 
 	LOG_DEBUG(problemassemblerlog) << "collecting segment pairs..." << std::endl;
 
-	_numSegmentPairs = 0;
-	_segmentPairs->clear();
-
-	_segmentPairExtractor->setInput("segments", _allSegments);
-
-	// add segment pairs into _allSegments
-//	pipeline::Value<Segments> sp = _segmentPairExtractor->getOutput("segment pairs");
-//	_segmentPairs = (*sp).getSegments();
-
-//	LOG_DEBUG(problemassemblerlog) << "collected " << _segmentPairs->size() << " segments" << std::endl;
-
-//	_numSegmentPairs = _segmentPairs->size();
-
-//	_allSegments->addAll(_segmentPairs);
-
-	// _segmentPairs = _segmentPairExtractor->getOutput("segment pairs").getSharedDataPointer();
-	_segmentPairs = &_segmentPairExtractor->getOutput("segment pairs");
 	_allSegments->addAll(_segmentPairs);
-
-	LOG_DEBUG(problemassemblerlog) << "collected " << _allSegments->size() << " segments, with segment pairs" << std::endl;
-
-	// get segment pair linear constraints
-	_segmentPairLinearConstraints = &_segmentPairExtractor->getOutput("segment pair linear constraints");
+	_numSegmentPairs = _segmentPairs->size();
 
 
 }
@@ -192,9 +170,6 @@ ProblemAssembler::addExplanationConstraints() {
 		setCoefficient(*segment);
 
 	foreach (boost::shared_ptr<BranchSegment> segment, _allSegments->getBranches())
-		setCoefficient(*segment);
-
-	foreach (boost::shared_ptr<SegmentPair> segment, _allSegments->getSegmentPairs())
 		setCoefficient(*segment);
 
 	LOG_DEBUG(problemassemblerlog) << "created " << _consistencyConstraints.size() << " linear constraints" << std::endl;
@@ -344,6 +319,10 @@ ProblemAssembler::mapConstraints(boost::shared_ptr<LinearConstraints> linearCons
 void
 ProblemAssembler::addSegmentPairConstraints() {
 	LOG_DEBUG(problemassemblerlog) << "adding segment-pair constraints..." << std::endl;
+
+	// set coefficients
+	foreach (boost::shared_ptr<SegmentPair> segment, _allSegments->getSegmentPairs())
+		setCoefficient(*segment);
 
 	 mapConstraints(_segmentPairLinearConstraints);
 }

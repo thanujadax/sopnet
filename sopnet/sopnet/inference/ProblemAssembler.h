@@ -91,6 +91,12 @@ private:
 	// synapse linear constraints on the segments for each pair of frames
 	pipeline::Inputs<LinearConstraints> _synapseLinearConstraints;
 
+	// all segment pairs in the problem
+	pipeline::Input<Segments>          _segmentPairs;
+
+	// segment pair linear constraints for the entire set of segment pairs in the problem
+	pipeline::Input<LinearConstraints> _segmentPairLinearConstraints;
+
 	// all segments in the problem
 	pipeline::Output<Segments>          _allSegments;
 
@@ -153,15 +159,6 @@ private:
 	// min ratio of overlap to size to consider a mitochondria or synapse 
 	// segment to be enclosed by a neuron segment
 	double _enclosingSynapseThreshold;
-
-	// internal process node to extract segment pairs from continuation segments
-	boost::shared_ptr<SegmentPairExtractor>  _segmentPairExtractor;
-
-	// all segment pairs in the problem
-	boost::shared_ptr<Segments>          _segmentPairs;
-
-	// segment pair linear constraints for the entire set of segment pairs in the problem
-	boost::shared_ptr<LinearConstraints> _segmentPairLinearConstraints;
 
 };
 

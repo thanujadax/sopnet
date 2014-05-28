@@ -27,6 +27,8 @@ public:
 
 private:
 
+	void collectSegments();
+
 	void updateOutputs();
 
 	void extractSegmentPairsAll();
@@ -42,15 +44,23 @@ private:
 	void assembleLinearConstraint(boost::shared_ptr<SegmentPair> segmentPair,
 			double coefSegmentPair, double coefSegment1, double coefSegment2, Relation relation, double value);
 
-	// list of all continuation segments
-	pipeline::Input<Segments>          _segments;
+    // a list of neuron segments for each pair of frames
+    pipeline::Inputs<Segments>         _neuronSegments;
 
-	// list of all segment pairs
-	pipeline::Output<Segments>          _segmentPairs;
+    // a list of mitochondria segments for each pair of frames
+    pipeline::Inputs<Segments>         _mitochondriaSegments;
 
-	// list of all linear constraints
+    // a list of synapse segments for each pair of frames
+    pipeline::Inputs<Segments>         _synapseSegments;
+
+    // all segments in the problem
+    pipeline::Output<Segments>          _segmentPairs;
+
+	// list of all segment pair linear constraints
 	pipeline::Output<LinearConstraints> _linearConstraints;
 
+    // all segments in the problem
+    boost::shared_ptr<Segments>          _allSegments;
 };
 
 #endif /* SOPNET_SEGMENTS_SEGMENTPAIREXTRACTOR_H_ */
