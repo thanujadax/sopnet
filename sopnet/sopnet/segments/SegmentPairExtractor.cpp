@@ -68,7 +68,7 @@ SegmentPairExtractor::extractSegmentPairsAll(){
 	foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations() ) {
 		extractSegmentPairs(segment);
 		}
-	LOG_DEBUG(segmentpairextractorlog) << "collected " << _allSegments->size() << " segments with segmentPairs" << std::endl;
+	LOG_DEBUG(segmentpairextractorlog) << "collected " << _segmentPairs->size() << " segmentPairs" << std::endl;
 }
 
 void

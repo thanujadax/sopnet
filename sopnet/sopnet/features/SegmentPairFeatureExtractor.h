@@ -24,6 +24,12 @@ private:
 
     void updateOutputs();
 
+	void computeFeatures(const boost::shared_ptr<EndSegment> end, std::vector<double>& features);
+
+	void computeFeatures(const boost::shared_ptr<ContinuationSegment> continuation, std::vector<double>& features);
+
+	void computeFeatures(const boost::shared_ptr<BranchSegment> branch, std::vector<double>& features);
+
 	void computeFeatures(const boost::shared_ptr<SegmentPair> segmentPair, std::vector<double>& features);
 
 	double getRelativeOffset(

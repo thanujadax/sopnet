@@ -42,6 +42,9 @@ HistogramFeatureExtractor::updateOutputs() {
 
 	foreach (boost::shared_ptr<BranchSegment> segment, _segments->getBranches())
 		getFeatures(*segment, _features->get(segment->getId()));
+
+	foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
+			getFeatures(*segment, _features->get(segment->getId()));
 }
 
 void
@@ -106,6 +109,12 @@ HistogramFeatureExtractor::getFeatures(const BranchSegment& branch, std::vector<
 
 	for (unsigned int i = 0; i < _numBins; i++)
 		features[2*_numBins + _numBins + i] = std::abs(sourceHistogram[i]/sourceSum - targetHistogram[i]/targetSum);
+}
+
+void
+HistogramFeatureExtractor::getFeatures(const SegmentPair& segmentPair, std::vector<double>& features) {
+	for (unsigned int i = 0; i < _numBins*4; i++)
+			features[i] = Features::NoFeatureValue;
 }
 
 std::vector<double>

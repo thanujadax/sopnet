@@ -46,12 +46,46 @@ SegmentPairFeatureExtractor::updateOutputs(){
     _features->addName("sp 2nd derivative of size");
     _features->addName("sp 2nd derivative of size abs");
 
+
+    foreach (boost::shared_ptr<EndSegment> segment, _segments->getEnds())
+                    computeFeatures(segment, _features->get(segment->getId()));
+
+    foreach (boost::shared_ptr<ContinuationSegment> segment, _segments->getContinuations())
+                    computeFeatures(segment, _features->get(segment->getId()));
+
+    foreach (boost::shared_ptr<BranchSegment> segment, _segments->getBranches())
+                    computeFeatures(segment, _features->get(segment->getId()));
+
     foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
                     computeFeatures(segment, _features->get(segment->getId()));
 
     LOG_ALL(segmentpairfeatureextractorlog) << "found features: " << *_features << std::endl;
 
     LOG_DEBUG(segmentpairfeatureextractorlog) << "done" << std::endl;
+}
+
+void
+SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment> end, std::vector<double>& features){
+
+	features[0] = Features::NoFeatureValue;
+	features[1] = Features::NoFeatureValue;
+	features[2] = Features::NoFeatureValue;
+}
+
+void
+SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<ContinuationSegment> continuation, std::vector<double>& features){
+
+	features[0] = Features::NoFeatureValue;
+	features[1] = Features::NoFeatureValue;
+	features[2] = Features::NoFeatureValue;
+}
+
+void
+SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegment> branch, std::vector<double>& features){
+
+	features[0] = Features::NoFeatureValue;
+	features[1] = Features::NoFeatureValue;
+	features[2] = Features::NoFeatureValue;
 }
 
 void
@@ -82,33 +116,6 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair
 	features[0] = getRelativeOffset(slice1,slice2,slice3);
 	features[1] = getD2Area(slice1,slice2,slice3);
 	features[2] = abs (features[1]);
-}
-
-void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment> end, std::vector<double>& features){
-
-
-	features[0] = Features::NoFeatureValue;
-	features[1] = Features::NoFeatureValue;
-	features[2] = Features::NoFeatureValue;
-}
-
-void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<ContinuationSegment> continuation, std::vector<double>& features){
-
-
-	features[0] = Features::NoFeatureValue;
-	features[1] = Features::NoFeatureValue;
-	features[2] = Features::NoFeatureValue;
-}
-
-void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegment> branch, std::vector<double>& features){
-
-
-	features[0] = Features::NoFeatureValue;
-	features[1] = Features::NoFeatureValue;
-	features[2] = Features::NoFeatureValue;
 }
 
 double

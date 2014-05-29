@@ -126,6 +126,8 @@ ProblemAssembler::collectSegmentPairs(){
 	_allSegments->addAll(_segmentPairs);
 	_numSegmentPairs = _segmentPairs->size();
 
+	LOG_DEBUG(problemassemblerlog) << "collected " << _numSegmentPairs << " segment pairs" << std::endl;
+
 
 }
 
@@ -325,6 +327,8 @@ ProblemAssembler::addSegmentPairConstraints() {
 		setCoefficient(*segment);
 
 	 mapConstraints(_segmentPairLinearConstraints);
+
+	LOG_DEBUG(problemassemblerlog) << "added " << _segmentPairLinearConstraints->size() << " segment-pair constraints..." << std::endl;
 }
 
 void
