@@ -73,9 +73,11 @@ private:
 
 	pipeline::Input<costs_function_type> _randomForestCostFunction;
 	pipeline::Input<costs_function_type> _segmentationCostFunction;
+	pipeline::Input<costs_function_type> _linearCostFunction;
 
 	std::map<unsigned int, double> _randomForestCostMap;
 	std::map<unsigned int, double> _segmentationCostMap;
+	std::map<unsigned int, double> _linearCostMap;
 
 	
 };

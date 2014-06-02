@@ -5,12 +5,13 @@
 #include <sopnet/segments/EndSegment.h>
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
+#include <sopnet/segments/SegmentPair.h>
 #include "GoldStandardCostFunction.h"
 
 static logger::LogChannel linearcostfunctionlog("linearcostfunctionlog", "[GoldStandardCostFunction] ");
 
 GoldStandardCostFunction::GoldStandardCostFunction() :
-	_costFunction(new costs_function_type(boost::bind(&GoldStandardCostFunction::costs, this, _1, _2, _3, _4))),
+	_costFunction(new costs_function_type(boost::bind(&GoldStandardCostFunction::costs, this, _1, _2, _3, _4, _5))),
 	_overlap(false, false) {
 
 	registerInput(_groundTruth, "ground truth");
@@ -25,6 +26,7 @@ GoldStandardCostFunction::costs(
 		const std::vector<boost::shared_ptr<EndSegment> >&          ends,
 		const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 		const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
+		const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
 		std::vector<double>& segmentCosts) {
 
 	unsigned int i = 0;
@@ -52,6 +54,15 @@ GoldStandardCostFunction::costs(
 		segmentCosts[i] += c;
 		i++;
 	}
+
+	foreach (boost::shared_ptr<SegmentPair> segmentPair, segmentPairs) {
+
+		double c = costs(*segmentPair);
+
+		segmentCosts[i] += c;
+		i++;
+	}
+
 }
 
 double
@@ -92,6 +103,8 @@ GoldStandardCostFunction::getOverlappingGroundTruthSegments(const Segment& segme
 	foreach (boost::shared_ptr<BranchSegment> gtSegment, _groundTruth->getBranches(interSectionInterval))
 		if (overlaps(segment, *gtSegment))
 			overlappingGtSegments->add(gtSegment);
+	// TODO: segment pairs?
+
 
 	return overlappingGtSegments;
 }

@@ -23,6 +23,7 @@ ProblemGraphWriter::ProblemGraphWriter() {
 	registerInput(_features, "features");
 	registerInput(_randomForestCostFunction, "segment cost function");
 	registerInput(_segmentationCostFunction, "segmentation cost function");
+	registerInput(_linearCostFunction, "linear cost function");
 }
 
 void
