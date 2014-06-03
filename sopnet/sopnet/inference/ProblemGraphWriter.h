@@ -21,6 +21,7 @@ class ProblemGraphWriter : public pipeline::SimpleProcessNode<> {
 			(const std::vector<boost::shared_ptr<EndSegment> >&          ends,
 			 const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 			 const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
+			 const std::vector<boost::shared_ptr<SegmentPair> >&       segmentPairs,
 			 std::vector<double>& costs)>
 			costs_function_type;
 
@@ -56,6 +57,16 @@ private:
 	void writeSliceImage(const Slice& slice, const std::string& sliceImageDirectory, int originSection, int targetSection);
 
 	void writeSegment(const Segment& segment, std::ofstream& out, int originSection, int targetSection);
+
+	void writeSegmentPairDetails();
+
+	void writeSegmentPairConstraints();
+
+	void writeSegmentPairCosts();
+
+	void writeSegmentPairFeatures();
+
+	void writeSegmentPairComponentProperties();
 
 	// all extracted segments
 	pipeline::Input<Segments> _segments;

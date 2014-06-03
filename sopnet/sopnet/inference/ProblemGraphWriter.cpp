@@ -268,3 +268,74 @@ ProblemGraphWriter::writeSegment(const Segment& segment, std::ofstream& out, int
 	out << std::endl;
 
 }
+
+void
+ProblemGraphWriter::writeSegmentPairDetails(){
+
+	updateInputs();
+
+	if (!_segments.isSet() || !_problemConfiguration.isSet() ) {
+
+		LOG_DEBUG(problemgraphwriterlog) << "not all required inputs are present -- skip dumping" << std::endl;
+		return;
+	}
+
+	LOG_DEBUG(problemgraphwriterlog) << "writing details of segment pairs ..."  << std::endl;
+
+	writeSegmentPairComponentProperties();
+
+	writeSegmentPairCosts();
+
+	writeSegmentPairConstraints();
+
+	writeSegmentPairFeatures();
+}
+
+void
+ProblemGraphWriter::writeSegmentPairComponentProperties(){
+	/* for each segment pair, write down
+	 * segment pair id, variable id,
+	 * segment1 id, variable id, segment2 id, variable id
+	 * for seg1 and 2, {center, area} of {source slice, target slice}
+	 */
+	boost::shared_ptr<ContinuationSegment> segment1, segment2;
+	boost::shared_ptr<Slice> slice1, slice2, slice3;
+
+	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarID, segment1VarID, segment2VarID;
+
+
+	foreach(boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs() ){
+
+		segment1 = segmentPair->getContinuationSegment1();
+		segment2 = segmentPair->getContinuationSegment2();
+
+		if(segment1->getDirection()==Left){
+
+			slice1 = segment1->getTargetSlice();
+			slice2 = segment1->getSourceSlice();
+
+		} else {
+
+			slice2 = segment1->getTargetSlice();
+			slice1 = segment1->getSourceSlice();
+
+		}
+
+		if(segment2->getDirection()==Left)
+			slice3 = segment2->getSourceSlice();
+		else
+			slice3 = segment2->getTargetSlice();
+
+
+
+	}
+
+}
+
+void
+ProblemGraphWriter::writeSegmentPairFeatures(){
+	/*
+	 *
+	 *
+	 */
+}
