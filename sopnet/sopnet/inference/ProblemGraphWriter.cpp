@@ -105,8 +105,8 @@ ProblemGraphWriter::writeSegments(const std::string& segmentsFile, int originSli
 	std::vector<double> randomForestCosts(_segments->size(), 0);
 	std::vector<double> segmentationCosts(_segments->size(), 0);
 
-	(*_randomForestCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), randomForestCosts );
-	(*_segmentationCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), segmentationCosts );
+	(*_randomForestCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), _segments->getSegmentPairs(), randomForestCosts );
+	(*_segmentationCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), _segments->getSegmentPairs(), segmentationCosts );
 
 	unsigned int counter = 0;
 	foreach (boost::shared_ptr<Segment> segment, _segments->getSegments()) {
@@ -367,20 +367,17 @@ ProblemGraphWriter::writeSegmentPairConstraints(const std::string& segmentPairCo
 	std::ofstream constraintOutput;
 	constraintOutput.open(segmentPairConstraintsFile.c_str());
 
-	unsigned int numSegPairs = _segments->getSegmentPairs()->size();
+	unsigned int numSegPairs = _segments->getSegmentPairs().size();
 	unsigned int numSegPairConstraints = numSegPairs * 2;
 
 	unsigned int segPairConstraintStart, segPairConstraintStop;
 
-	segPairConstraintStop = _linearConstraints->size(); // less than
+	segPairConstraintStop = _linearConstraints.size(); // less than
 	segPairConstraintStart = segPairConstraintStop - numSegPairConstraints;
-
-	LinearConstraint& linearConstraint;
 
 	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
 
-		linearConstraint = *_linearConstraints[i];
-		constraintOutput << linearConstraint << std::endl;
+		constraintOutput << _linearConstraints[i] << std::endl;
 
 	}
 
