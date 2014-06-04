@@ -11,6 +11,8 @@
 
 #include "SegmentPairDetailsWriter.h"
 
+static logger::LogChannel segmentpairdetailswriterlog("segmentpairdetailswriterlog", "[SegmentPairDetailsWriter] ");
+
 SegmentPairDetailsWriter::SegmentPairDetailsWriter() {
 
 	registerInput(_segments, "segments");
@@ -21,7 +23,7 @@ SegmentPairDetailsWriter::SegmentPairDetailsWriter() {
 }
 
 void
-ProblemGraphWriter::writeSegmentPairDetails(
+SegmentPairDetailsWriter::writeSegmentPairDetails(
 		const std::string segmentPairPropertiesFile,
 		const std::string segmentPairConstraintsFile){
 
@@ -29,7 +31,7 @@ ProblemGraphWriter::writeSegmentPairDetails(
 
 	if (!_segments.isSet() || !_problemConfiguration.isSet() ) {
 
-		LOG_DEBUG(problemgraphwriterlog) << "not all required inputs are present -- skip dumping" << std::endl;
+		LOG_DEBUG(segmentpairdetailswriterlog) << "not all required inputs are present -- skip dumping" << std::endl;
 		return;
 	}
 
@@ -38,7 +40,7 @@ ProblemGraphWriter::writeSegmentPairDetails(
 
 	// writeSegmentPairProperties(segmentPairPropertiesFile);
 
-	LOG_DEBUG(problemgraphwriterlog) << "writing down constraints for segment pairs ..."  << std::endl;
+	LOG_DEBUG(segmentpairdetailswriterlog) << "writing down constraints for segment pairs ..."  << std::endl;
 
 	writeSegmentPairConstraints(segmentPairConstraintsFile);
 
@@ -46,7 +48,7 @@ ProblemGraphWriter::writeSegmentPairDetails(
 }
 
 void
-ProblemGraphWriter::writeSegmentPairProperties(const std::string segmentPairPropertiesFile){
+SegmentPairDetailsWriter::writeSegmentPairProperties(const std::string segmentPairPropertiesFile){
 	/* for each segment pair, write down
 	 * segment pair id, variable id,
 	 * segment1 id, variable id, segment2 id, variable id
@@ -94,7 +96,7 @@ ProblemGraphWriter::writeSegmentPairProperties(const std::string segmentPairProp
 }
 
 void
-ProblemGraphWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
+SegmentPairDetailsWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
 	/*
 	 *
 	 */
@@ -102,7 +104,7 @@ ProblemGraphWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segment
 }
 
 void
-ProblemGraphWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
+SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
 	/*
 	 *
 	 */
@@ -110,7 +112,7 @@ ProblemGraphWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segm
 }
 
 void
-ProblemGraphWriter::writeSegmentPairConstraints(const std::string segmentPairConstraintsFile){
+SegmentPairDetailsWriter::writeSegmentPairConstraints(const std::string segmentPairConstraintsFile){
 	/* From the total number of constraints, only pick the constraints relevant for segment pairs.
 	 * Currently we have 2 constraints per each segment pair and they are the last block of linear constraints
 	 */
