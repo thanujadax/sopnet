@@ -270,7 +270,9 @@ ProblemGraphWriter::writeSegment(const Segment& segment, std::ofstream& out, int
 }
 
 void
-ProblemGraphWriter::writeSegmentPairDetails(){
+ProblemGraphWriter::writeSegmentPairDetails(
+		const std::string& segmentPairPropertiesFile,
+		const std::string& segmentPairConstraintsFile){
 
 	updateInputs();
 
@@ -280,19 +282,20 @@ ProblemGraphWriter::writeSegmentPairDetails(){
 		return;
 	}
 
-	LOG_DEBUG(problemgraphwriterlog) << "writing details of segment pairs ..."  << std::endl;
 
-	writeSegmentPairComponentProperties();
+	// LOG_DEBUG(problemgraphwriterlog) << "writing down details of segment pairs ..."  << std::endl;
 
-	writeSegmentPairCosts();
+	// writeSegmentPairProperties(segmentPairPropertiesFile);
 
-	writeSegmentPairConstraints();
+	LOG_DEBUG(problemgraphwriterlog) << "writing down constraints for segment pairs ..."  << std::endl;
 
-	writeSegmentPairFeatures();
+	writeSegmentPairConstraints(segmentPairConstraintsFile);
+
+
 }
 
 void
-ProblemGraphWriter::writeSegmentPairComponentProperties(){
+ProblemGraphWriter::writeSegmentPairProperties(const std::string& segmentPairPropertiesFile){
 	/* for each segment pair, write down
 	 * segment pair id, variable id,
 	 * segment1 id, variable id, segment2 id, variable id
@@ -302,6 +305,9 @@ ProblemGraphWriter::writeSegmentPairComponentProperties(){
 	boost::shared_ptr<Slice> slice1, slice2, slice3;
 
 	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarID, segment1VarID, segment2VarID;
+
+	std::ofstream segmentPairPropertiesOutput(segmentPairPropertiesFile.c_str());
+	segmentPairPropertiesOutput.open(segmentPairPropertiesFile.c_str());
 
 
 	foreach(boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs() ){
@@ -327,15 +333,57 @@ ProblemGraphWriter::writeSegmentPairComponentProperties(){
 			slice3 = segment2->getTargetSlice();
 
 
+		writeSegmentPairCosts(segmentPair,segmentPairPropertiesOutput);
 
+		writeSegmentPairFeatures(segmentPair,segmentPairPropertiesOutput);
+
+		segmentPairPropertiesOutput.close();
 	}
 
 }
 
 void
-ProblemGraphWriter::writeSegmentPairFeatures(){
+ProblemGraphWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
 	/*
 	 *
+	 */
+
+}
+
+void
+ProblemGraphWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
+	/*
 	 *
 	 */
+
+}
+
+void
+ProblemGraphWriter::writeSegmentPairConstraints(const std::string& segmentPairConstraintsFile){
+	/* From the total number of constraints, only pick the constraints relevant for segment pairs.
+	 * Currently we have 2 constraints per each segment pair and they are the last block of linear constraints
+	 */
+
+	std::ofstream constraintOutput;
+	constraintOutput.open(segmentPairConstraintsFile.c_str());
+
+	unsigned int numSegPairs = _segments->getSegmentPairs()->size();
+	unsigned int numSegPairConstraints = numSegPairs * 2;
+
+	unsigned int segPairConstraintStart, segPairConstraintStop;
+
+	segPairConstraintStop = _linearConstraints->size(); // less than
+	segPairConstraintStart = segPairConstraintStop - numSegPairConstraints;
+
+	LinearConstraint& linearConstraint;
+
+	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
+
+		linearConstraint = *_linearConstraints[i];
+		constraintOutput << linearConstraint << std::endl;
+
+	}
+
+	constraintOutput.close();
+
 }
