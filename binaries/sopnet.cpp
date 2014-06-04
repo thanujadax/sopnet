@@ -141,6 +141,12 @@ util::ProgramOption optionGridSearch(
 		_long_name        = "gridSearch",
 		_description_text = "Preform a grid search.");
 
+util::ProgramOption optionProblemGraphFile(
+		util::_module           = "sopnet",
+		util::_long_name        = "problemGraphFile",
+		util::_description_text = "Path to the problem graph file to produce.",
+		util::_default_value    = "problem.graph");
+
 void processEvents(boost::shared_ptr<gui::Window>& window) {
 
 	LOG_USER(out) << " started as " << window->getCaption() << " at " << window.get() << std::endl;
@@ -600,6 +606,13 @@ int main(int optionc, char** optionv) {
 		if (optionWriteStructuredProblem) {
 
 			sopnet->writeStructuredProblem("./labels.txt", "./features.txt", "./constraints.txt");
+
+			LOG_USER(out) << "[main] files for structured learning written!" << std::endl;
+		}
+
+		if (optionProblemGraphFile) {
+
+			sopnet->dumpProblemDetails("./segPairProperties.txt", "./segPairConstraints.txt");
 
 			LOG_USER(out) << "[main] files for structured learning written!" << std::endl;
 		}

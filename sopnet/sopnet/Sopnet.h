@@ -29,6 +29,7 @@ class SegmentFeaturesExtractor;
 class SegmentRandomForestTrainer;
 class SegmentationCostFunction;
 class StructuredProblemWriter;
+class SegmentPairDetailsWriter;
 
 template <typename Precision> class SliceExtractor;
 
@@ -42,9 +43,11 @@ public:
 	 *
 	 * @param projectDirectory The directory to read and write the data from and to.
 	 */
-	Sopnet(const std::string& projectDirectory, boost::shared_ptr<ProcessNode> problemWriter = boost::shared_ptr<ProcessNode>());
+	Sopnet(const std::string& projectDirectory, boost::shared_ptr<ProcessNode> problemWriter);
 
 	void writeStructuredProblem(std::string filename_labels, std::string filename_features, std::string filename_constraints);
+
+	void dumpProblemDetails(std::string filename_segPairDetails, std::string filename_segPairConstraints);
 
 private:
 
@@ -159,6 +162,9 @@ private:
 
 	// a writer provider to provide a structured problem writer to produce output for structured learning
 	boost::shared_ptr<StructuredProblemWriter>		_spWriter;
+
+	// a writer to dump details of segment pairs
+	boost::shared_ptr<SegmentPairDetailsWriter>		_segmentPairDetailsWriter;
 
 	/**************************
 	 * PROJECT INFRASTRUCTURE *

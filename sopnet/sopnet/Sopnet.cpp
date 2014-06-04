@@ -10,6 +10,7 @@
 #include <sopnet/evaluation/GroundTruthExtractor.h>
 #include <sopnet/features/SegmentFeaturesExtractor.h>
 #include <sopnet/inference/ProblemGraphWriter.h>
+#include <sopnet/inference/SegmentPairDetailsWriter.h>
 #include <sopnet/inference/ObjectiveGenerator.h>
 #include <sopnet/inference/ProblemAssembler.h>
 #include <sopnet/inference/SubproblemsExtractor.h>
@@ -64,6 +65,14 @@ util::ProgramOption optionDecomposeProblem(
 		util::_description_text = "Decompose the problem into overlapping subproblems and solve them using SCALAR.",
 		util::_default_value    = false);
 
+util::ProgramOption optionSegmentPairDetailsWriter(
+		util::_module           = "sopnet.inference",
+		util::_long_name        = "segmentPairDetails",
+		util::_description_text = "Dump details of segment pairs (component segments, features, constraints)",
+		util::_default_value    = false);
+
+
+
 Sopnet::Sopnet(
 		const std::string& projectDirectory,
 		boost::shared_ptr<ProcessNode> problemWriter) :
@@ -79,6 +88,7 @@ Sopnet::Sopnet(
 	_goldStandardExtractor(boost::make_shared<GoldStandardExtractor>()),
 	_segmentRfTrainer(boost::make_shared<SegmentRandomForestTrainer>()),
 	_spWriter(boost::make_shared<StructuredProblemWriter>()),
+	_segmentPairDetailsWriter(boost::shared_ptr<SegmentPairDetailsWriter>()),
 	_projectDirectory(projectDirectory),
 	_problemWriter(problemWriter),
 	_pipelineCreated(false) {
@@ -272,6 +282,15 @@ Sopnet::createInferencePipeline() {
 
 	_priorCostFunction->setInput("parameters", _priorCostFunctionParameters);
 
+	if(optionSegmentPairDetailsWriter){
+
+		_segmentPairDetailsWriter->setInput("segments", _problemAssembler->getOutput("segments"));
+		_segmentPairDetailsWriter->setInput("problem configuration", _problemAssembler->getOutput("problem configuration"));
+		_segmentPairDetailsWriter->setInput("features", _segmentFeaturesExtractor->getOutput("all features"));
+		_segmentPairDetailsWriter->setInput("linear cost function", linearCostFunction->getOutput("cost function"));
+		_segmentPairDetailsWriter->addInput("linear constraints", _problemAssembler->getOutput("linear constraints"));
+	}
+
 	if (_problemWriter) {
 
 		_problemWriter->setInput("segments", _problemAssembler->getOutput("segments"));
@@ -369,5 +388,22 @@ Sopnet::writeStructuredProblem(std::string filename_labels, std::string filename
 	LOG_DEBUG(sopnetlog) << "writing structured learning files" << std::endl;
 
 	_spWriter->write(filename_labels, filename_features, filename_constraints);
+}
+
+void
+Sopnet::dumpProblemDetails(std::string filename_segPairProperties, std::string filename_segPairConstraints){
+
+	LOG_DEBUG(sopnetlog) << "requested to dump problem details, updating inputs" << std::endl;
+
+	updateInputs();
+
+	LOG_DEBUG(sopnetlog) << "creating internal pipeline, if not created yet" << std::endl;
+
+	createPipeline();
+
+	LOG_DEBUG(sopnetlog) << "dumping problem details (segment pairs) ..." << std::endl;
+
+	_segmentPairDetailsWriter->writeSegmentPairDetails(filename_segPairProperties, filename_segPairConstraints);
+
 }
 

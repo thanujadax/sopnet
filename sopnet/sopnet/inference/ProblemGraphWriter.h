@@ -58,18 +58,6 @@ private:
 
 	void writeSegment(const Segment& segment, std::ofstream& out, int originSection, int targetSection);
 
-	void writeSegmentPairDetails(
-			const std::string& segmentPairPropertiesFile,
-			const std::string& segmentPairConstraintsFile);
-
-	void writeSegmentPairProperties(const std::string& segmentPairPropertiesFile);
-
-	void writeSegmentPairConstraints(const std::string& segmentPairConstraintsFile);
-
-	void writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);
-
-	void writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);
-
 
 	// all extracted segments
 	pipeline::Input<Segments> _segments;
