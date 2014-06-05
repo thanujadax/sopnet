@@ -42,6 +42,8 @@ private:
 			const boost::shared_ptr<Slice> slice2,
 			const boost::shared_ptr<Slice> slice3);
 
+	double getAbsVal(double input);
+
     pipeline::Input<Segments> _segments;
 
     pipeline::Output<Features> _features;

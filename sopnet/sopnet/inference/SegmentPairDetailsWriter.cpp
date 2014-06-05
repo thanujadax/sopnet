@@ -81,6 +81,8 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 	boost::shared_ptr<Slice> slice1, slice2, slice3;
 
 	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarId, segment1VarId, segment2VarId;
+	unsigned int area1, area2, area3;
+	double offset, x1, x2, y1, y2, x3, y3, dz;
 
 	segmentPairId = segmentPair->getId();
 	segmentPairVarId = _problemConfiguration->getVariable(segmentPairId);
@@ -93,7 +95,7 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 	segment2Id = segment2->getId();
 	segment2VarId = _problemConfiguration->getVariable(segment2Id);
 
-	/*if(segment1->getDirection()==Left){
+	if(segment1->getDirection()==Left){
 
 		slice1 = segment1->getTargetSlice();
 		slice2 = segment1->getSourceSlice();
@@ -108,11 +110,31 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 	if(segment2->getDirection()==Left)
 		slice3 = segment2->getSourceSlice();
 	else
-		slice3 = segment2->getTargetSlice();*/
+		slice3 = segment2->getTargetSlice();
+
+	area1 = slice1->getComponent()->getSize();
+	area2 = slice2->getComponent()->getSize();
+	area3 = slice3->getComponent()->getSize();
+
+	x1 = slice1->getComponent()->getCenter().x;
+	y1 = slice1->getComponent()->getCenter().y;
+
+	x2 = slice2->getComponent()->getCenter().x;
+	y2 = slice2->getComponent()->getCenter().y;
+
+	x3 = slice3->getComponent()->getCenter().x;
+	y3 = slice3->getComponent()->getCenter().y;
+
 
 	propOutput << "SegPID " << segmentPairId << "; " << "SegPVarID " << segmentPairVarId << "; ";
 	propOutput << "Seg1ID " << segment1Id << "; " << "Seg1VarID " << segment1VarId << "; ";
 	propOutput << "Seg2ID " << segment2Id << "; " << "Seg2VarID " << segment2VarId << "; ";
+
+	propOutput << "a1 " << area1 << "; ";
+	propOutput << "a2 " << area2 << "; ";
+	propOutput << "a3 " << area3 << "; ";
+
+	propOutput << "centroids (" << x1 << "," << y1 << "), ("<< x2 << "," << y2 << "), ("<< x3 << "," << y3 << "); ";
 
 }
 

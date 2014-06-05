@@ -115,7 +115,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair
 	// start with feature[numEnds+numContinuations+numBranches] instead of features[0]
 	features[0] = getRelativeOffset(slice1,slice2,slice3);
 	features[1] = getD2Area(slice1,slice2,slice3);
-	features[2] = abs (features[1]);
+	features[2] = getAbsVal(features[1]);
 }
 
 double
@@ -152,12 +152,22 @@ SegmentPairFeatureExtractor::getD2Area(
 
 	// returns the rate of change of area across the 3 slices of the segment pair
 
-	unsigned int a1, a2, a3;
+	double a1, a2, a3;
 
-	a1 = slice1->getComponent()->getSize();
-	a2 = slice2->getComponent()->getSize();
-	a3 = slice3->getComponent()->getSize();
+	a1 = (double)slice1->getComponent()->getSize();
+	a2 = (double)slice2->getComponent()->getSize();
+	a3 = (double)slice3->getComponent()->getSize();
 
 	return (a2-a1)*(a3-a2)/(a1*a2);
+
+}
+
+double
+SegmentPairFeatureExtractor::getAbsVal(double input){
+
+	if(input<0)
+		return input * -1.0;
+	else
+		return input;
 
 }
