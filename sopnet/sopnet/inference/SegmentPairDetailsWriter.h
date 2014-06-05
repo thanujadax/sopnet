@@ -47,6 +47,8 @@ private :
 
 	void writeSegmentPairConstraints(const std::string segmentPairConstraintsFile);
 
+	void writeSegmentPairComponentDetails(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);
+
 	void writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);
 
 	void writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);

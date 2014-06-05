@@ -35,9 +35,9 @@ SegmentPairDetailsWriter::writeSegmentPairDetails(
 	}
 
 
-	// LOG_DEBUG(segmentpairdetailswriterlog) << "writing down details of segment pairs ..."  << std::endl;
+	LOG_DEBUG(segmentpairdetailswriterlog) << "writing down details of segment pairs ..."  << std::endl;
 
-	// writeSegmentPairProperties(segmentPairPropertiesFile);
+	writeSegmentPairProperties(segmentPairPropertiesFile);
 
 	LOG_DEBUG(segmentpairdetailswriterlog) << "writing down constraints for segment pairs ..."  << std::endl;
 
@@ -53,45 +53,66 @@ SegmentPairDetailsWriter::writeSegmentPairProperties(const std::string segmentPa
 	 * segment1 id, variable id, segment2 id, variable id
 	 * for seg1 and 2, {center, area} of {source slice, target slice}
 	 */
-	boost::shared_ptr<ContinuationSegment> segment1, segment2;
-	boost::shared_ptr<Slice> slice1, slice2, slice3;
 
-	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarID, segment1VarID, segment2VarID;
-
-	std::ofstream segmentPairPropertiesOutput(segmentPairPropertiesFile.c_str());
+	std::ofstream segmentPairPropertiesOutput;
 	segmentPairPropertiesOutput.open(segmentPairPropertiesFile.c_str());
 
 
 	foreach(boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs() ){
 
-		segment1 = segmentPair->getContinuationSegment1();
-		segment2 = segmentPair->getContinuationSegment2();
-
-		if(segment1->getDirection()==Left){
-
-			slice1 = segment1->getTargetSlice();
-			slice2 = segment1->getSourceSlice();
-
-		} else {
-
-			slice2 = segment1->getTargetSlice();
-			slice1 = segment1->getSourceSlice();
-
-		}
-
-		if(segment2->getDirection()==Left)
-			slice3 = segment2->getSourceSlice();
-		else
-			slice3 = segment2->getTargetSlice();
-
+		writeSegmentPairComponentDetails(segmentPair,segmentPairPropertiesOutput);
 
 		writeSegmentPairCosts(segmentPair,segmentPairPropertiesOutput);
 
 		writeSegmentPairFeatures(segmentPair,segmentPairPropertiesOutput);
 
-		segmentPairPropertiesOutput.close();
 	}
 
+	segmentPairPropertiesOutput.close();
+
+}
+
+void
+SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& propOutput){
+
+	boost::shared_ptr<ContinuationSegment> segment1, segment2;
+	boost::shared_ptr<Slice> slice1, slice2, slice3;
+
+	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarId, segment1VarId, segment2VarId;
+
+	segmentPairId = segmentPair->getId();
+	segmentPairVarId = _problemConfiguration->getVariable(segmentPairId);
+
+	segment1 = segmentPair->getContinuationSegment1();
+	segment2 = segmentPair->getContinuationSegment2();
+
+	segment1Id = segment1->getId();
+	segment1VarId = _problemConfiguration->getVariable(segment1Id);
+	segment2Id = segment2->getId();
+	segment2VarId = _problemConfiguration->getVariable(segment2Id);
+
+	/*if(segment1->getDirection()==Left){
+
+		slice1 = segment1->getTargetSlice();
+		slice2 = segment1->getSourceSlice();
+
+	} else {
+
+		slice2 = segment1->getTargetSlice();
+		slice1 = segment1->getSourceSlice();
+
+	}
+
+	if(segment2->getDirection()==Left)
+		slice3 = segment2->getSourceSlice();
+	else
+		slice3 = segment2->getTargetSlice();*/
+
+	propOutput << "SegPID " << segmentPairId << "; " << "SegPVarID " << segmentPairVarId << "; ";
+	propOutput << "Seg1ID " << segment1Id << "; " << "Seg1VarID " << segment1VarId << "; ";
+	propOutput << "Seg2ID " << segment2Id << "; " << "Seg2VarID " << segment2VarId << "; ";
+
+	propOutput << std::endl;
 }
 
 void
