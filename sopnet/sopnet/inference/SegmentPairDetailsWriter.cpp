@@ -17,9 +17,8 @@ SegmentPairDetailsWriter::SegmentPairDetailsWriter() {
 
 	registerInput(_segments, "segments");
 	registerInput(_problemConfiguration, "problem configuration");
-	registerInputs(_linearConstraints, "linear constraints");
+	registerInput(_linearConstraints, "linear constraints");
 	registerInput(_features, "features");
-	registerInput(_linearCostFunction, "linear cost function");
 }
 
 void
@@ -125,13 +124,21 @@ SegmentPairDetailsWriter::writeSegmentPairConstraints(const std::string segmentP
 
 	unsigned int segPairConstraintStart, segPairConstraintStop;
 
-	segPairConstraintStop = _linearConstraints.size(); // less than
+	segPairConstraintStop = _linearConstraints->size(); // less than
 	segPairConstraintStart = segPairConstraintStop - numSegPairConstraints;
 
-	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
+	constraintOutput << "Total number constraints = " << segPairConstraintStop << std::endl;
+	constraintOutput << "Number of segment pair constraints = " << numSegPairConstraints << std::endl;
 
-		constraintOutput << _linearConstraints[i] << std::endl;
+/*	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
 
+		LinearConstraint& constraint = *_linearConstraints[i];
+		constraintOutput << constraint << std::endl;
+
+	}*/
+
+	foreach (const LinearConstraint& constraint, *_linearConstraints) {
+	        	constraintOutput << constraint << std::endl;
 	}
 
 	constraintOutput.close();

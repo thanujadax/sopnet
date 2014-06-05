@@ -41,6 +41,8 @@ public :
 
 private :
 
+	void updateOutputs() {}
+
 	void writeSegmentPairProperties(const std::string segmentPairPropertiesFile);
 
 	void writeSegmentPairConstraints(const std::string segmentPairConstraintsFile);
@@ -59,11 +61,9 @@ private :
 	pipeline::Input<Features> _features;
 
 	// all linear constraints on the slices (one set per section)
-	pipeline::Inputs<LinearConstraints> _linearConstraints;
+	pipeline::Input<LinearConstraints> _linearConstraints;
 
 	pipeline::Input<ProblemConfiguration> _problemConfiguration;
-
-	pipeline::Input<costs_function_type> _linearCostFunction;
 
 	std::map<unsigned int, double> _linearCostMap;
 
