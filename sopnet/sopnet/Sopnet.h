@@ -43,7 +43,7 @@ public:
 	 *
 	 * @param projectDirectory The directory to read and write the data from and to.
 	 */
-	Sopnet(const std::string& projectDirectory, boost::shared_ptr<ProcessNode> problemWriter);
+	Sopnet(const std::string& projectDirectory, boost::shared_ptr<ProcessNode> problemWriter = boost::shared_ptr<ProcessNode>());
 
 	void writeStructuredProblem(std::string filename_labels, std::string filename_features, std::string filename_constraints);
 
