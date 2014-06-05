@@ -66,6 +66,8 @@ SegmentPairDetailsWriter::writeSegmentPairProperties(const std::string segmentPa
 
 		writeSegmentPairFeatures(segmentPair,segmentPairPropertiesOutput);
 
+		segmentPairPropertiesOutput << std::endl;
+
 	}
 
 	segmentPairPropertiesOutput.close();
@@ -112,7 +114,6 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 	propOutput << "Seg1ID " << segment1Id << "; " << "Seg1VarID " << segment1VarId << "; ";
 	propOutput << "Seg2ID " << segment2Id << "; " << "Seg2VarID " << segment2VarId << "; ";
 
-	propOutput << std::endl;
 }
 
 void
@@ -124,10 +125,22 @@ SegmentPairDetailsWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> s
 }
 
 void
-SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
-	/*
-	 *
+SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& featuresOutput){
+	/* So far we only have 3 features
+	 * # 60 - offset
+	 * # 61 - multiple of dA/dz of seg1 and seg2
+	 * # 62 - abs of 61
 	 */
+
+	const std::vector<double>& features = _features->get(segmentPair->getId());
+	/*for (unsigned int j = 0; j < features.size(); j++) {
+		featuresOutput << features[j] << " ";
+	}
+	featuresOutput << std::endl;
+	*/
+	featuresOutput << "offset " << features[59] << "; ";
+	featuresOutput << "change of area mult " << features[60] << "; ";
+	featuresOutput << "abs of prev " << features[61] << "; ";
 
 }
 
