@@ -20,7 +20,8 @@
 logger::LogChannel segmentpairfeatureextractorlog("segmentpairfeatureextractorlog", "[SegmentPairFeatureExtractor] ");
 
 SegmentPairFeatureExtractor::SegmentPairFeatureExtractor() :
-	_features(new Features()){
+	_features(new Features()),
+	_dz(10.0){
 
     registerInput(_segments, "segments");
     registerOutput(_features, "features");
@@ -36,15 +37,17 @@ SegmentPairFeatureExtractor::updateOutputs(){
 
     LOG_DEBUG(segmentpairfeatureextractorlog) << "extracting features" << std::endl;
 
-    unsigned int numSegmentPairFeatures = 3;
+    unsigned int numSegmentPairFeatures = 5;
 
     _features->clear();
 
     _features->resize(_segments->size(), numSegmentPairFeatures);
 
     _features->addName("sp 2nd segment relative offset");
-    _features->addName("sp 2nd derivative of size");
-    _features->addName("sp 2nd derivative of size abs");
+    _features->addName("sp product of change of area of two segments");
+    _features->addName("sp abs of product of change of area");
+    _features->addName("sp 2nd derivative of area");
+    _features->addName("sp abs of 2nd derivative of area");
 
 
     foreach (boost::shared_ptr<EndSegment> segment, _segments->getEnds())
@@ -70,6 +73,8 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment>
 	features[0] = Features::NoFeatureValue;
 	features[1] = Features::NoFeatureValue;
 	features[2] = Features::NoFeatureValue;
+	features[3] = Features::NoFeatureValue;
+	features[4] = Features::NoFeatureValue;
 }
 
 void
@@ -78,6 +83,8 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<Continuatio
 	features[0] = Features::NoFeatureValue;
 	features[1] = Features::NoFeatureValue;
 	features[2] = Features::NoFeatureValue;
+	features[3] = Features::NoFeatureValue;
+	features[4] = Features::NoFeatureValue;
 }
 
 void
@@ -86,6 +93,8 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegme
 	features[0] = Features::NoFeatureValue;
 	features[1] = Features::NoFeatureValue;
 	features[2] = Features::NoFeatureValue;
+	features[3] = Features::NoFeatureValue;
+	features[4] = Features::NoFeatureValue;
 }
 
 void
@@ -114,8 +123,10 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair
 	// fill zeros for feature[0] to feature[numEnds+numContinuations+numBranches -1]
 	// start with feature[numEnds+numContinuations+numBranches] instead of features[0]
 	features[0] = getRelativeOffset(slice1,slice2,slice3);
-	features[1] = getD2Area(slice1,slice2,slice3);
+	features[1] = getAreaChangeProduct(slice1,slice2,slice3);
 	features[2] = getAbsVal(features[1]);
+	features[3] = getD2Area(slice1,slice2,slice3);
+	features[4] = getAbsVal(features[3]);
 }
 
 double
@@ -124,8 +135,8 @@ SegmentPairFeatureExtractor::getRelativeOffset(
 		const boost::shared_ptr<Slice> slice2,
 		const boost::shared_ptr<Slice> slice3){
 
-	double offset, x1, x2, y1, y2, x3, y3, dz;
-	dz = 10.0; // relative resolution in z direction
+	double offset, x1, x2, y1, y2, x3, y3;
+
 
 	x1 = slice1->getComponent()->getCenter().x;
 	y1 = slice1->getComponent()->getCenter().y;
@@ -137,20 +148,20 @@ SegmentPairFeatureExtractor::getRelativeOffset(
 	y3 = slice3->getComponent()->getCenter().y;
 
 	offset = acos(
-			((x2-x1)*(x3-x2)+(y2-y1)*(y3-y2)+dz*dz) /
-			(sqrt(pow((x2-x1),2)+pow((y2-y1),2)+pow(dz,2))*sqrt(pow((x3-x2),2)+pow((y3-y2),2)+pow(dz,2)))
+			((x2-x1)*(x3-x2)+(y2-y1)*(y3-y2)+_dz*_dz) /
+			(sqrt(pow((x2-x1),2)+pow((y2-y1),2)+pow(_dz,2))*sqrt(pow((x3-x2),2)+pow((y3-y2),2)+pow(_dz,2)))
 			);
 
 	return offset;
 }
 
 double
-SegmentPairFeatureExtractor::getD2Area(
+SegmentPairFeatureExtractor::getAreaChangeProduct(
 		const boost::shared_ptr<Slice> slice1,
 		const boost::shared_ptr<Slice> slice2,
 		const boost::shared_ptr<Slice> slice3){
 
-	// returns the rate of change of area across the 3 slices of the segment pair
+	// returns the product of change of area of the two segments in the segmentPair
 
 	double a1, a2, a3;
 
@@ -170,4 +181,19 @@ SegmentPairFeatureExtractor::getAbsVal(double input){
 	else
 		return input;
 
+}
+
+double
+SegmentPairFeatureExtractor::getD2Area(
+		const boost::shared_ptr<Slice> slice1,
+		const boost::shared_ptr<Slice> slice2,
+		const boost::shared_ptr<Slice> slice3){
+
+	double a1, a2, a3;
+
+	a1 = (double)slice1->getComponent()->getSize();
+	a2 = (double)slice2->getComponent()->getSize();
+	a3 = (double)slice3->getComponent()->getSize();
+
+	return (a3-2*a2+a1)/(_dz*_dz);
 }

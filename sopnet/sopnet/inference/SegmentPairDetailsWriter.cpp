@@ -82,7 +82,7 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 
 	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarId, segment1VarId, segment2VarId;
 	unsigned int area1, area2, area3;
-	double offset, x1, x2, y1, y2, x3, y3, dz;
+	double x1, x2, y1, y2, x3, y3;
 
 	segmentPairId = segmentPair->getId();
 	segmentPairVarId = _problemConfiguration->getVariable(segmentPairId);
@@ -167,8 +167,10 @@ SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair
 	featuresOutput << std::endl;
 	*/
 	featuresOutput << "offset " << features[59] << "; ";
-	featuresOutput << "change of area mult " << features[60] << "; ";
-	featuresOutput << "abs of prev " << features[61] << "; ";
+	featuresOutput << "changeOfAreaMult " << features[60] << "; ";
+	featuresOutput << "abs_changeOfAreaMult " << features[61] << "; ";
+	featuresOutput << "d2A " << features[62] << "; ";
+	featuresOutput << "abs_d2A " << features[63] << "; ";
 
 }
 
@@ -184,12 +186,12 @@ SegmentPairDetailsWriter::writeSegmentPairConstraints(const std::string segmentP
 	unsigned int numSegPairs = _segments->getSegmentPairs().size();
 	unsigned int numSegPairConstraints = numSegPairs * 2;
 
-	unsigned int segPairConstraintStart, segPairConstraintStop;
+/*	unsigned int segPairConstraintStart, segPairConstraintStop;
 
 	segPairConstraintStop = _linearConstraints->size(); // less than
-	segPairConstraintStart = segPairConstraintStop - numSegPairConstraints;
+	segPairConstraintStart = segPairConstraintStop - numSegPairConstraints;*/
 
-	constraintOutput << "Total number constraints = " << segPairConstraintStop << std::endl;
+	constraintOutput << "Total number constraints = " << _linearConstraints->size() << std::endl;
 	constraintOutput << "Number of segment pair constraints = " << numSegPairConstraints << std::endl;
 
 /*	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
