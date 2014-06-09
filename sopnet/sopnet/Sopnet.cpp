@@ -26,6 +26,7 @@
 #include <sopnet/training/GoldStandardExtractor.h>
 #include <sopnet/training/SegmentRandomForestTrainer.h>
 #include <sopnet/training/io/StructuredProblemWriter.h>
+
 #include "Sopnet.h"
 
 static logger::LogChannel sopnetlog("sopnetlog", "[Sopnet] ");
@@ -65,13 +66,6 @@ util::ProgramOption optionDecomposeProblem(
 		util::_description_text = "Decompose the problem into overlapping subproblems and solve them using SCALAR.",
 		util::_default_value    = false);
 
-util::ProgramOption optionSegmentPairDetailsWriter(
-		util::_module           = "sopnet.inference",
-		util::_long_name        = "segmentPairDetails",
-		util::_description_text = "Dump details of segment pairs (component segments, features, constraints)",
-		util::_default_value    = false);
-
-
 
 Sopnet::Sopnet(
 		const std::string& projectDirectory,
@@ -88,7 +82,7 @@ Sopnet::Sopnet(
 	_goldStandardExtractor(boost::make_shared<GoldStandardExtractor>()),
 	_segmentRfTrainer(boost::make_shared<SegmentRandomForestTrainer>()),
 	_spWriter(boost::make_shared<StructuredProblemWriter>()),
-	_segmentPairDetailsWriter(boost::shared_ptr<SegmentPairDetailsWriter>()),
+	_segmentPairDetailsWriter(boost::make_shared<SegmentPairDetailsWriter>()),
 	_projectDirectory(projectDirectory),
 	_problemWriter(problemWriter),
 	_pipelineCreated(false) {
@@ -151,7 +145,7 @@ Sopnet::createPipeline() {
 		createTrainingPipeline();
 		createStructuredProblemPipeline();
 	}
-
+	createSegmentPairDumpPipeline();
 	_pipelineCreated = true;
 }
 
@@ -282,15 +276,6 @@ Sopnet::createInferencePipeline() {
 
 	_priorCostFunction->setInput("parameters", _priorCostFunctionParameters);
 
-	if(optionSegmentPairDetailsWriter){
-
-		_segmentPairDetailsWriter->setInput("segments", _problemAssembler->getOutput("segments"));
-		_segmentPairDetailsWriter->setInput("problem configuration", _problemAssembler->getOutput("problem configuration"));
-		_segmentPairDetailsWriter->setInput("features", _segmentFeaturesExtractor->getOutput("all features"));
-		_segmentPairDetailsWriter->setInput("linear cost function", linearCostFunction->getOutput("cost function"));
-		_segmentPairDetailsWriter->addInput("linear constraints", _problemAssembler->getOutput("linear constraints"));
-	}
-
 	if (_problemWriter) {
 
 		_problemWriter->setInput("segments", _problemAssembler->getOutput("segments"));
@@ -372,6 +357,15 @@ Sopnet::createStructuredProblemPipeline() {
 	_spWriter->setInput("segments", _problemAssembler->getOutput("segments"));
 	_spWriter->setInput("ground truth segments", _groundTruthExtractor->getOutput("ground truth segments"));
 	_spWriter->setInput("gold standard", _goldStandardExtractor->getOutput("gold standard"));
+}
+
+void
+Sopnet::createSegmentPairDumpPipeline(){
+
+	_segmentPairDetailsWriter->setInput("segments", _problemAssembler->getOutput("segments"));
+	_segmentPairDetailsWriter->setInput("problem configuration", _problemAssembler->getOutput("problem configuration"));
+	_segmentPairDetailsWriter->setInput("features", _segmentFeaturesExtractor->getOutput("all features"));
+	_segmentPairDetailsWriter->setInput("linear constraints", _problemAssembler->getOutput("linear constraints"));
 }
 
 void

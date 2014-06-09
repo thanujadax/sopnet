@@ -17,9 +17,8 @@ SegmentPairDetailsWriter::SegmentPairDetailsWriter() {
 
 	registerInput(_segments, "segments");
 	registerInput(_problemConfiguration, "problem configuration");
-	registerInputs(_linearConstraints, "linear constraints");
+	registerInput(_linearConstraints, "linear constraints");
 	registerInput(_features, "features");
-	registerInput(_linearCostFunction, "linear cost function");
 }
 
 void
@@ -36,9 +35,9 @@ SegmentPairDetailsWriter::writeSegmentPairDetails(
 	}
 
 
-	// LOG_DEBUG(problemgraphwriterlog) << "writing down details of segment pairs ..."  << std::endl;
+	LOG_DEBUG(segmentpairdetailswriterlog) << "writing down details of segment pairs ..."  << std::endl;
 
-	// writeSegmentPairProperties(segmentPairPropertiesFile);
+	writeSegmentPairProperties(segmentPairPropertiesFile);
 
 	LOG_DEBUG(segmentpairdetailswriterlog) << "writing down constraints for segment pairs ..."  << std::endl;
 
@@ -54,44 +53,88 @@ SegmentPairDetailsWriter::writeSegmentPairProperties(const std::string segmentPa
 	 * segment1 id, variable id, segment2 id, variable id
 	 * for seg1 and 2, {center, area} of {source slice, target slice}
 	 */
-	boost::shared_ptr<ContinuationSegment> segment1, segment2;
-	boost::shared_ptr<Slice> slice1, slice2, slice3;
 
-	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarID, segment1VarID, segment2VarID;
-
-	std::ofstream segmentPairPropertiesOutput(segmentPairPropertiesFile.c_str());
+	std::ofstream segmentPairPropertiesOutput;
 	segmentPairPropertiesOutput.open(segmentPairPropertiesFile.c_str());
 
 
 	foreach(boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs() ){
 
-		segment1 = segmentPair->getContinuationSegment1();
-		segment2 = segmentPair->getContinuationSegment2();
-
-		if(segment1->getDirection()==Left){
-
-			slice1 = segment1->getTargetSlice();
-			slice2 = segment1->getSourceSlice();
-
-		} else {
-
-			slice2 = segment1->getTargetSlice();
-			slice1 = segment1->getSourceSlice();
-
-		}
-
-		if(segment2->getDirection()==Left)
-			slice3 = segment2->getSourceSlice();
-		else
-			slice3 = segment2->getTargetSlice();
-
+		writeSegmentPairComponentDetails(segmentPair,segmentPairPropertiesOutput);
 
 		writeSegmentPairCosts(segmentPair,segmentPairPropertiesOutput);
 
 		writeSegmentPairFeatures(segmentPair,segmentPairPropertiesOutput);
 
-		segmentPairPropertiesOutput.close();
+		segmentPairPropertiesOutput << std::endl;
+
 	}
+
+	segmentPairPropertiesOutput.close();
+
+}
+
+void
+SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& propOutput){
+
+	boost::shared_ptr<ContinuationSegment> segment1, segment2;
+	boost::shared_ptr<Slice> slice1, slice2, slice3;
+
+	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarId, segment1VarId, segment2VarId;
+	unsigned int area1, area2, area3;
+	double offset, x1, x2, y1, y2, x3, y3, dz;
+
+	segmentPairId = segmentPair->getId();
+	segmentPairVarId = _problemConfiguration->getVariable(segmentPairId);
+
+	segment1 = segmentPair->getContinuationSegment1();
+	segment2 = segmentPair->getContinuationSegment2();
+
+	segment1Id = segment1->getId();
+	segment1VarId = _problemConfiguration->getVariable(segment1Id);
+	segment2Id = segment2->getId();
+	segment2VarId = _problemConfiguration->getVariable(segment2Id);
+
+	if(segment1->getDirection()==Left){
+
+		slice1 = segment1->getTargetSlice();
+		slice2 = segment1->getSourceSlice();
+
+	} else {
+
+		slice2 = segment1->getTargetSlice();
+		slice1 = segment1->getSourceSlice();
+
+	}
+
+	if(segment2->getDirection()==Left)
+		slice3 = segment2->getSourceSlice();
+	else
+		slice3 = segment2->getTargetSlice();
+
+	area1 = slice1->getComponent()->getSize();
+	area2 = slice2->getComponent()->getSize();
+	area3 = slice3->getComponent()->getSize();
+
+	x1 = slice1->getComponent()->getCenter().x;
+	y1 = slice1->getComponent()->getCenter().y;
+
+	x2 = slice2->getComponent()->getCenter().x;
+	y2 = slice2->getComponent()->getCenter().y;
+
+	x3 = slice3->getComponent()->getCenter().x;
+	y3 = slice3->getComponent()->getCenter().y;
+
+
+	propOutput << "SegPID " << segmentPairId << "; " << "SegPVarID " << segmentPairVarId << "; ";
+	propOutput << "Seg1ID " << segment1Id << "; " << "Seg1VarID " << segment1VarId << "; ";
+	propOutput << "Seg2ID " << segment2Id << "; " << "Seg2VarID " << segment2VarId << "; ";
+
+	propOutput << "a1 " << area1 << "; ";
+	propOutput << "a2 " << area2 << "; ";
+	propOutput << "a3 " << area3 << "; ";
+
+	propOutput << "centroids (" << x1 << "," << y1 << "), ("<< x2 << "," << y2 << "), ("<< x3 << "," << y3 << "); ";
 
 }
 
@@ -104,10 +147,28 @@ SegmentPairDetailsWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> s
 }
 
 void
+<<<<<<< HEAD
 SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
 	/*
 	 *
+
+SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& featuresOutput){
+	/* So far we only have 3 features
+	 * # 60 - offset
+	 * # 61 - multiple of dA/dz of seg1 and seg2
+	 * # 62 - abs of 61
+>>>>>>> 6ea1e591d98329ab78ec48b64bffb5bf88af77da
 	 */
+
+	const std::vector<double>& features = _features->get(segmentPair->getId());
+	/*for (unsigned int j = 0; j < features.size(); j++) {
+		featuresOutput << features[j] << " ";
+	}
+	featuresOutput << std::endl;
+	*/
+	featuresOutput << "offset " << features[59] << "; ";
+	featuresOutput << "change of area mult " << features[60] << "; ";
+	featuresOutput << "abs of prev " << features[61] << "; ";
 
 }
 
@@ -125,13 +186,21 @@ SegmentPairDetailsWriter::writeSegmentPairConstraints(const std::string segmentP
 
 	unsigned int segPairConstraintStart, segPairConstraintStop;
 
-	segPairConstraintStop = _linearConstraints.size(); // less than
+	segPairConstraintStop = _linearConstraints->size(); // less than
 	segPairConstraintStart = segPairConstraintStop - numSegPairConstraints;
 
-	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
+	constraintOutput << "Total number constraints = " << segPairConstraintStop << std::endl;
+	constraintOutput << "Number of segment pair constraints = " << numSegPairConstraints << std::endl;
 
-		constraintOutput << _linearConstraints[i] << std::endl;
+/*	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
 
+		LinearConstraint& constraint = *_linearConstraints[i];
+		constraintOutput << constraint << std::endl;
+
+	}*/
+
+	foreach (const LinearConstraint& constraint, *_linearConstraints) {
+	        	constraintOutput << constraint << std::endl;
 	}
 
 	constraintOutput.close();

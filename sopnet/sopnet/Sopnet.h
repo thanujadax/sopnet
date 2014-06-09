@@ -63,6 +63,8 @@ private:
 
 	void createStructuredProblemPipeline();
 
+	void createSegmentPairDumpPipeline();
+
 	/**********
 	 * INPUTS *
 	 **********/

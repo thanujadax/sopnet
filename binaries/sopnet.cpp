@@ -141,11 +141,9 @@ util::ProgramOption optionGridSearch(
 		_long_name        = "gridSearch",
 		_description_text = "Preform a grid search.");
 
-util::ProgramOption optionProblemGraphFile(
-		util::_module           = "sopnet",
-		util::_long_name        = "problemGraphFile",
-		util::_description_text = "Path to the problem graph file to produce.",
-		util::_default_value    = "problem.graph");
+util::ProgramOption optionDumpSegmentPairDetails(
+		util::_long_name        = "segmentPairDetailsDump",
+		util::_description_text = "Write segment pair details (constraints, component segments, features).");
 
 void processEvents(boost::shared_ptr<gui::Window>& window) {
 
@@ -610,7 +608,7 @@ int main(int optionc, char** optionv) {
 			LOG_USER(out) << "[main] files for structured learning written!" << std::endl;
 		}
 
-		if (optionProblemGraphFile) {
+		if (optionDumpSegmentPairDetails) {
 
 			sopnet->dumpProblemDetails("./segPairProperties.txt", "./segPairConstraints.txt");
 
