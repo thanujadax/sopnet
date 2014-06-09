@@ -37,16 +37,23 @@ private:
 			const boost::shared_ptr<Slice> slice2,
 			const boost::shared_ptr<Slice> slice3);
 
-	double getD2Area(
+	double getAreaChangeProduct(
 			const boost::shared_ptr<Slice> slice1,
 			const boost::shared_ptr<Slice> slice2,
 			const boost::shared_ptr<Slice> slice3);
 
 	double getAbsVal(double input);
 
+	double getD2Area(
+			const boost::shared_ptr<Slice> slice1,
+			const boost::shared_ptr<Slice> slice2,
+			const boost::shared_ptr<Slice> slice3);
+
     pipeline::Input<Segments> _segments;
 
     pipeline::Output<Features> _features;
+
+    double _dz; // relative resolution in z direction. value (10.0) initialized in constructor
 
 };
 
