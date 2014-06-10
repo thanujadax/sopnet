@@ -147,17 +147,12 @@ SegmentPairDetailsWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> s
 }
 
 void
-<<<<<<< HEAD
-SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
-	/*
-	 *
 
 SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& featuresOutput){
 	/* So far we only have 3 features
 	 * # 60 - offset
 	 * # 61 - multiple of dA/dz of seg1 and seg2
 	 * # 62 - abs of 61
->>>>>>> 6ea1e591d98329ab78ec48b64bffb5bf88af77da
 	 */
 
 	const std::vector<double>& features = _features->get(segmentPair->getId());
