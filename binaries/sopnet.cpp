@@ -612,7 +612,7 @@ int main(int optionc, char** optionv) {
 
 			sopnet->dumpProblemDetails("./segPairProperties.txt", "./segPairConstraints.txt");
 
-			LOG_USER(out) << "[main] files for structured learning written!" << std::endl;
+			LOG_USER(out) << "[main] segment pair details files written!" << std::endl;
 		}
 
 		if (optionSaveResultDirectory) {
