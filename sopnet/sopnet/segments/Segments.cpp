@@ -261,6 +261,25 @@ Segments::getSegments(unsigned int interval) {
 	return allSegments;
 }
 
+std::vector<boost::shared_ptr<Segment> >
+Segments::getSegmentsComplex() const {
+
+	std::vector<boost::shared_ptr<Segment> > allSegments;
+
+	std::vector<boost::shared_ptr<EndSegment> >          ends          = get(_ends);
+	std::vector<boost::shared_ptr<ContinuationSegment> > continuations = get(_continuations);
+	std::vector<boost::shared_ptr<BranchSegment> >       branches      = get(_branches);
+	std::vector<boost::shared_ptr<SegmentPair> >         segmentPairs  = get(_segmentPairs);
+
+
+	std::copy(ends.begin(), ends.end(), std::back_inserter(allSegments));
+	std::copy(continuations.begin(), continuations.end(), std::back_inserter(allSegments));
+	std::copy(branches.begin(), branches.end(), std::back_inserter(allSegments));
+	std::copy(segmentPairs.begin(), segmentPairs.end(), std::back_inserter(allSegments));
+
+	return allSegments;
+}
+
 std::vector<boost::shared_ptr<EndSegment> >
 Segments::findEnds(
 		boost::shared_ptr<EndSegment> reference,

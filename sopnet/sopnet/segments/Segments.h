@@ -169,6 +169,11 @@ public:
 	std::vector<boost::shared_ptr<Segment> > getSegments() const;
 
 	/**
+	 * Get all segments including complex segments
+	 */
+	std::vector<boost::shared_ptr<Segment> > getSegmentsComplex() const;
+
+	/**
 	 * Get all segments in the given inter-section interval.
 	 */
 	std::vector<boost::shared_ptr<Segment> > getSegments(unsigned int interval);
