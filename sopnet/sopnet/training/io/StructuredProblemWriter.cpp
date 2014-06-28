@@ -35,7 +35,7 @@ StructuredProblemWriter::writeLabels(std::string filename_labels) {
 	// write only the labels.
 	// How many variables are there?
 	unsigned int maxVariable = 0;
-        foreach (boost::shared_ptr<Segment> segment, _segments->getSegments()) {
+        foreach (boost::shared_ptr<Segment> segment, _segments->getSegmentsComplex()) {
                 maxVariable = std::max(maxVariable,_problemConfiguration->getVariable(segment->getId()));
         }
 
@@ -83,7 +83,7 @@ StructuredProblemWriter::writeFeatures(std::string filename_features) {
 	// the problem assembler. 
 	// Maybe there is a better way to do this?
 	unsigned int maxVariable = 0;
-	foreach (boost::shared_ptr<Segment> segment, _segments->getSegments()) {
+	foreach (boost::shared_ptr<Segment> segment, _segments->getSegmentsComplex()) {
 		maxVariable = std::max(maxVariable,_problemConfiguration->getVariable(segment->getId()));
 	}
 
