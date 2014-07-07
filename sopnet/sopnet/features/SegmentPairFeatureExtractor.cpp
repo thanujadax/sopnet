@@ -37,7 +37,7 @@ SegmentPairFeatureExtractor::updateOutputs(){
 
     LOG_DEBUG(segmentpairfeatureextractorlog) << "extracting features" << std::endl;
 
-    unsigned int numSegmentPairFeatures = 5;
+    unsigned int numSegmentPairFeatures = 6;
 
     _features->clear();
 
@@ -48,6 +48,7 @@ SegmentPairFeatureExtractor::updateOutputs(){
     _features->addName("sp abs of product of change of area");
     _features->addName("sp 2nd derivative of area");
     _features->addName("sp abs of 2nd derivative of area");
+    _features->addName("sp is segment pair");
 
 
     foreach (boost::shared_ptr<EndSegment> segment, _segments->getEnds())
@@ -75,6 +76,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment>
 	features[2] = Features::NoFeatureValue;
 	features[3] = Features::NoFeatureValue;
 	features[4] = Features::NoFeatureValue;
+	features[5] = Features::NoFeatureValue;
 }
 
 void
@@ -85,6 +87,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<Continuatio
 	features[2] = Features::NoFeatureValue;
 	features[3] = Features::NoFeatureValue;
 	features[4] = Features::NoFeatureValue;
+	features[5] = Features::NoFeatureValue;
 }
 
 void
@@ -95,6 +98,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegme
 	features[2] = Features::NoFeatureValue;
 	features[3] = Features::NoFeatureValue;
 	features[4] = Features::NoFeatureValue;
+	features[5] = Features::NoFeatureValue;
 }
 
 void
@@ -127,6 +131,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair
 	features[2] = getAbsVal(features[1]);
 	features[3] = getD2Area(slice1,slice2,slice3);
 	features[4] = getAbsVal(features[3]);
+	features[5] = 1;
 }
 
 double
