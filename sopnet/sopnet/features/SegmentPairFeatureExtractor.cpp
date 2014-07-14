@@ -37,7 +37,7 @@ SegmentPairFeatureExtractor::updateOutputs(){
 
     LOG_DEBUG(segmentpairfeatureextractorlog) << "extracting features" << std::endl;
 
-    unsigned int numSegmentPairFeatures = 6;
+    unsigned int numSegmentPairFeatures = 2;
 
     _features->clear();
 
@@ -45,10 +45,10 @@ SegmentPairFeatureExtractor::updateOutputs(){
 
     _features->addName("sp is segment pair");
     _features->addName("sp 2nd segment relative offset");
-    _features->addName("sp product of change of area of two segments");
+    /*_features->addName("sp product of change of area of two segments");
     _features->addName("sp abs of product of change of area");
     _features->addName("sp 2nd derivative of area");
-    _features->addName("sp abs of 2nd derivative of area");
+    _features->addName("sp abs of 2nd derivative of area");*/
 
 
     foreach (boost::shared_ptr<EndSegment> segment, _segments->getEnds())
@@ -73,10 +73,10 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment>
 
 	features[0] = Features::NoFeatureValue;
 	features[1] = Features::NoFeatureValue;
-	features[2] = Features::NoFeatureValue;
+	/*features[2] = Features::NoFeatureValue;
 	features[3] = Features::NoFeatureValue;
 	features[4] = Features::NoFeatureValue;
-	features[5] = Features::NoFeatureValue;
+	features[5] = Features::NoFeatureValue;*/
 }
 
 void
@@ -84,10 +84,10 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<Continuatio
 
 	features[0] = Features::NoFeatureValue;
 	features[1] = Features::NoFeatureValue;
-	features[2] = Features::NoFeatureValue;
+	/*features[2] = Features::NoFeatureValue;
 	features[3] = Features::NoFeatureValue;
 	features[4] = Features::NoFeatureValue;
-	features[5] = Features::NoFeatureValue;
+	features[5] = Features::NoFeatureValue; */
 }
 
 void
@@ -95,10 +95,10 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegme
 
 	features[0] = Features::NoFeatureValue;
 	features[1] = Features::NoFeatureValue;
-	features[2] = Features::NoFeatureValue;
+	/* features[2] = Features::NoFeatureValue;
 	features[3] = Features::NoFeatureValue;
 	features[4] = Features::NoFeatureValue;
-	features[5] = Features::NoFeatureValue;
+	features[5] = Features::NoFeatureValue; */
 }
 
 void
@@ -128,10 +128,10 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair
 	// start with feature[numEnds+numContinuations+numBranches] instead of features[0]
 	features[0] = 1;
 	features[1] = getRelativeOffset(slice1,slice2,slice3);
-	features[2] = getAreaChangeProduct(slice1,slice2,slice3);
+	/* features[2] = getAreaChangeProduct(slice1,slice2,slice3);
 	features[3] = getAbsVal(features[1]);
 	features[4] = getD2Area(slice1,slice2,slice3);
-	features[5] = getAbsVal(features[3]);
+	features[5] = getAbsVal(features[3]); */
 }
 
 double
