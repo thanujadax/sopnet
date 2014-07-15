@@ -81,36 +81,50 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 	boost::shared_ptr<Slice> slice1, slice2, slice3;
 
 	unsigned int segmentPairId, segment1Id, segment2Id, segmentPairVarId, segment1VarId, segment2VarId;
+	unsigned int segmentPairIsi,segmentPairSourceSection, segmentPairTargetSection,
+	segment1SourceSection, segment2SourceSection, segment1TargetSection, segment2TargetSection,
+	segment1Isi, segment2Isi;
 	unsigned int area1, area2, area3;
+
+	Direction segmentPairDirection, segment1Direction, segment2Direction;
+
 	double x1, x2, y1, y2, x3, y3;
 
 	segmentPairId = segmentPair->getId();
 	segmentPairVarId = _problemConfiguration->getVariable(segmentPairId);
+	segmentPairIsi = segmentPair->getInterSectionInterval();
+	segmentPairDirection = segmentPair->getDirection();
 
 	segment1 = segmentPair->getContinuationSegment1();
 	segment2 = segmentPair->getContinuationSegment2();
 
 	segment1Id = segment1->getId();
 	segment1VarId = _problemConfiguration->getVariable(segment1Id);
+	segment1Isi = segment1->getInterSectionInterval();
 	segment2Id = segment2->getId();
 	segment2VarId = _problemConfiguration->getVariable(segment2Id);
+	segment2Isi = segment2->getInterSectionInterval();
 
 	if(segment1->getDirection()==Left){
-
+		segment1Direction = Left;
 		slice1 = segment1->getTargetSlice();
 		slice2 = segment1->getSourceSlice();
 
 	} else {
-
+		segment1Direction = Right;
 		slice2 = segment1->getTargetSlice();
 		slice1 = segment1->getSourceSlice();
 
 	}
 
-	if(segment2->getDirection()==Left)
+	if(segment2->getDirection()==Left) {
+		segment2Direction = Left;
 		slice3 = segment2->getSourceSlice();
-	else
+	}
+	else {
+		segment2Direction = Right;
 		slice3 = segment2->getTargetSlice();
+	}
 
 	area1 = slice1->getComponent()->getSize();
 	area2 = slice2->getComponent()->getSize();
@@ -125,10 +139,21 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 	x3 = slice3->getComponent()->getCenter().x;
 	y3 = slice3->getComponent()->getCenter().y;
 
+	segmentPairSourceSection = slice1->getSection();
+	segmentPairTargetSection = slice3->getSection();
 
-	propOutput << "SegPID " << segmentPairId << "; " << "SegPVarID " << segmentPairVarId << "; ";
-	propOutput << "Seg1ID " << segment1Id << "; " << "Seg1VarID " << segment1VarId << "; ";
-	propOutput << "Seg2ID " << segment2Id << "; " << "Seg2VarID " << segment2VarId << "; ";
+	segment1SourceSection = segment1->getSourceSlice()->getSection();
+	segment1TargetSection = segment1->getTargetSlice()->getSection();
+	segment2SourceSection = segment2->getSourceSlice()->getSection();
+	segment2TargetSection = segment2->getTargetSlice()->getSection();
+
+	propOutput << "SegPID " << segmentPairId << "; SegPVarID " << segmentPairVarId << "; ";
+	propOutput << "SegPISI " << segmentPairIsi << "; SegPDirection " << segmentPairDirection << "; ";
+	propOutput << "SegPSrcSection " << segmentPairSourceSection << "; " << "SegPDstSection " << segmentPairTargetSection << "; ";
+	propOutput << "Seg1ID " << segment1Id << "; Seg1VarID " << segment1VarId << "; Seg1ISI " << segment1Isi << "; seg1Dir" << segment1Direction << "; ";
+	propOutput << "Seg1SrcSection " << segment1SourceSection << "; Seg1DestSection " << segment1TargetSection << "; ";
+	propOutput << "Seg2ID " << segment2Id << "; Seg2VarID " << segment2VarId << "; Seg2ISI " << segment2Isi << "; seg2Dir" << segment2Direction << "; ";
+	propOutput << "Seg2SrcSection " << segment2SourceSection << "; Seg2DestSection " << segment2TargetSection << "; ";
 
 	propOutput << "a1 " << area1 << "; ";
 	propOutput << "a2 " << area2 << "; ";

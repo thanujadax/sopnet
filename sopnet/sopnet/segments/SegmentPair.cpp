@@ -18,7 +18,7 @@ SegmentPair::SegmentPair(unsigned int id, Direction direction,
 				 continuationSegment1->getTargetSlice()->getComponent()->getCenter()*continuationSegment1->getTargetSlice()->getComponent()->getSize() +
 				 continuationSegment2->getTargetSlice()->getComponent()->getCenter()*continuationSegment2->getTargetSlice()->getComponent()->getSize())/
 				 (continuationSegment1->getSourceSlice()->getComponent()->getSize() + continuationSegment1->getTargetSlice()->getComponent()->getSize() + continuationSegment2->getTargetSlice()->getComponent()->getSize()),
-				 continuationSegment1->getSourceSlice()->getSection() - (direction == Right ? 0 : 1)),
+				 continuationSegment1->getInterSectionInterval()),
 		_continuationSegment1(continuationSegment1),
 		_continuationSegment2(continuationSegment2) {}
 
