@@ -404,6 +404,7 @@ Sopnet::dumpProblemDetails(std::string filename_segPairProperties, std::string f
 
 }
 
+void
 Sopnet::createMinimalImpactTEDPipeline() {
 
 	LOG_DEBUG(sopnetlog) << "re-creating minimal impact TED part..." << std::endl;
