@@ -30,6 +30,7 @@ class SegmentRandomForestTrainer;
 class SegmentationCostFunction;
 class StructuredProblemWriter;
 class SegmentPairDetailsWriter;
+class MinimalImpactTEDWriter;
 
 template <typename Precision> class SliceExtractor;
 
@@ -48,6 +49,8 @@ public:
 	void writeStructuredProblem(std::string filename_labels, std::string filename_features, std::string filename_constraints);
 
 	void dumpProblemDetails(std::string filename_segPairDetails, std::string filename_segPairConstraints);
+	void writeMinimalImpactTEDCoefficients(std::string filename);
+
 
 private:
 
@@ -64,6 +67,9 @@ private:
 	void createStructuredProblemPipeline();
 
 	void createSegmentPairDumpPipeline();
+
+	void createMinimalImpactTEDPipeline();
+
 
 	/**********
 	 * INPUTS *
@@ -162,11 +168,16 @@ private:
 	// the training node, trains a random forest classifier on the gold standard
 	boost::shared_ptr<SegmentRandomForestTrainer>     _segmentRfTrainer;
 
-	// a writer provider to provide a structured problem writer to produce output for structured learning
+	// a writer to produce output for structured learning
 	boost::shared_ptr<StructuredProblemWriter>		_spWriter;
+
 
 	// a writer to dump details of segment pairs
 	boost::shared_ptr<SegmentPairDetailsWriter>		_segmentPairDetailsWriter;
+
+	// a writer to write the coefficients for minimal imapact TED for structured learning
+	boost::shared_ptr<MinimalImpactTEDWriter>		_mitWriter;
+
 
 	/**************************
 	 * PROJECT INFRASTRUCTURE *

@@ -26,7 +26,7 @@
 #include <sopnet/training/GoldStandardExtractor.h>
 #include <sopnet/training/SegmentRandomForestTrainer.h>
 #include <sopnet/training/io/StructuredProblemWriter.h>
-
+#include <sopnet/training/io/MinimalImpactTEDWriter.h>
 #include "Sopnet.h"
 
 static logger::LogChannel sopnetlog("sopnetlog", "[Sopnet] ");
@@ -83,6 +83,7 @@ Sopnet::Sopnet(
 	_segmentRfTrainer(boost::make_shared<SegmentRandomForestTrainer>()),
 	_spWriter(boost::make_shared<StructuredProblemWriter>()),
 	_segmentPairDetailsWriter(boost::make_shared<SegmentPairDetailsWriter>()),
+	_mitWriter(boost::make_shared<MinimalImpactTEDWriter>()),
 	_projectDirectory(projectDirectory),
 	_problemWriter(problemWriter),
 	_pipelineCreated(false) {
@@ -144,6 +145,7 @@ Sopnet::createPipeline() {
 
 		createTrainingPipeline();
 		createStructuredProblemPipeline();
+		createMinimalImpactTEDPipeline();
 	}
 	createSegmentPairDumpPipeline();
 	_pipelineCreated = true;
@@ -385,6 +387,7 @@ Sopnet::writeStructuredProblem(std::string filename_labels, std::string filename
 }
 
 void
+
 Sopnet::dumpProblemDetails(std::string filename_segPairProperties, std::string filename_segPairConstraints){
 
 	LOG_DEBUG(sopnetlog) << "requested to dump problem details, updating inputs" << std::endl;
@@ -398,6 +401,36 @@ Sopnet::dumpProblemDetails(std::string filename_segPairProperties, std::string f
 	LOG_DEBUG(sopnetlog) << "dumping problem details (segment pairs) ..." << std::endl;
 
 	_segmentPairDetailsWriter->writeSegmentPairDetails(filename_segPairProperties, filename_segPairConstraints);
+
+}
+
+Sopnet::createMinimalImpactTEDPipeline() {
+
+	LOG_DEBUG(sopnetlog) << "re-creating minimal impact TED part..." << std::endl;
+
+	// Set inputs to MinimalImpactTEDWriter
+	_mitWriter->setInput("gold standard", _goldStandardExtractor->getOutput("gold standard"));	
+	_mitWriter->setInput("segments", _problemAssembler->getOutput("segments"));
+	_mitWriter->setInput("linear constraints", _problemAssembler->getOutput("linear constraints"));
+	_mitWriter->setInput("reference", _rawSections);
+	_mitWriter->setInput("problem configuration", _problemAssembler->getOutput("problem configuration"));
+
+}
+
+void
+Sopnet::writeMinimalImpactTEDCoefficients(std::string filename) {
+
+	LOG_DEBUG(sopnetlog) << "requested to write minimal impact TED coefficients, updating inputs" << std::endl;
+
+	updateInputs();
+
+	LOG_DEBUG(sopnetlog) << "creating internal pipeline, if not created yet" << std::endl;
+
+	createPipeline();
+
+	LOG_DEBUG(sopnetlog) << "writing minimal impact TED coefficient files..." << std::endl;
+
+	_mitWriter->write(filename);
 
 }
 
