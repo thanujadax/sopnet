@@ -46,6 +46,7 @@ Reconstructor::updateReconstruction() {
 			probe(segment);
 
 	LOG_ALL(reconstructorlog) << std::endl;
+
 }
 
 template <typename SegmentType>

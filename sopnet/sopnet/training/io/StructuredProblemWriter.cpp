@@ -43,7 +43,7 @@ StructuredProblemWriter::writeLabels(std::string filename_labels) {
 	//const std::vector<boost::shared_ptr<Segment> > groundTruthSegments = _groundTruthSegments->getSegments();
 
 	// Get a vector with all gold standard segments.
-	const std::vector<boost::shared_ptr<Segment> > goldStandard = _goldStandard->getSegments();
+	const std::vector<boost::shared_ptr<Segment> > goldStandard = _goldStandard->getSegmentsComplex();
 
 	// Output stream
 	std::ofstream labelsOutput;

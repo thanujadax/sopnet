@@ -174,11 +174,7 @@ SegmentPairDetailsWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> s
 void
 
 SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& featuresOutput){
-	/* So far we only have 3 features
-	 * # 60 - offset
-	 * # 61 - multiple of dA/dz of seg1 and seg2
-	 * # 62 - abs of 61
-	 */
+
 
 	const std::vector<double>& features = _features->get(segmentPair->getId());
 	/*for (unsigned int j = 0; j < features.size(); j++) {
@@ -186,11 +182,12 @@ SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair
 	}
 	featuresOutput << std::endl;
 	*/
-	featuresOutput << "offset " << features[59] << "; ";
-	featuresOutput << "changeOfAreaMult " << features[60] << "; ";
-	featuresOutput << "abs_changeOfAreaMult " << features[61] << "; ";
-	featuresOutput << "d2A " << features[62] << "; ";
-	featuresOutput << "abs_d2A " << features[63] << "; ";
+	featuresOutput << "isSegPair " << features[59] << "; ";
+	featuresOutput << "offset " << features[60] << "; ";
+	//featuresOutput << "changeOfAreaMult " << features[60] << "; ";
+	//featuresOutput << "abs_changeOfAreaMult " << features[61] << "; ";
+	//featuresOutput << "d2A " << features[62] << "; ";
+	//featuresOutput << "abs_d2A " << features[63] << "; ";
 
 }
 
