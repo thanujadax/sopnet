@@ -184,10 +184,10 @@ SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair
 	*/
 	featuresOutput << "isSegPair " << features[59] << "; ";
 	featuresOutput << "offset " << features[60] << "; ";
-	//featuresOutput << "changeOfAreaMult " << features[60] << "; ";
-	//featuresOutput << "abs_changeOfAreaMult " << features[61] << "; ";
-	//featuresOutput << "d2A " << features[62] << "; ";
-	//featuresOutput << "abs_d2A " << features[63] << "; ";
+	featuresOutput << "changeOfAreaMult " << features[61] << "; ";
+	featuresOutput << "abs_changeOfAreaMult " << features[62] << "; ";
+	featuresOutput << "d2A " << features[63] << "; ";
+	featuresOutput << "abs_d2A " << features[64] << "; ";
 
 }
 
