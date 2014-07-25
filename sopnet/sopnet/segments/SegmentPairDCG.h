@@ -16,9 +16,12 @@
 
 class SegmentPairDCG : public pipeline::SimpleProcessNode<> {
 
+public:
+	SegmentPairDCG();
+
 private :
 
-	void upadateOutputs();
+	void updateOutputs();
 
     // all segment pairs in the problem
     pipeline::Input<Segments>          _segmentPairsIn;

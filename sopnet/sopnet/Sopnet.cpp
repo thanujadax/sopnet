@@ -71,6 +71,7 @@ Sopnet::Sopnet(
 		const std::string& projectDirectory,
 		boost::shared_ptr<ProcessNode> problemWriter) :
 	_segmentPairExtractor(boost::make_shared<SegmentPairExtractor>()),
+	_segmentPairConstraintGenerator(boost::make_shared<SegmentPairConstraintGenerator>()),
 	_problemAssembler(boost::make_shared<ProblemAssembler>()),
 	_segmentFeaturesExtractor(boost::make_shared<SegmentFeaturesExtractor>()),
 	_randomForestReader(boost::make_shared<RandomForestHdf5Reader>(optionRandomForestFile.as<std::string>())),
@@ -222,9 +223,13 @@ Sopnet::createBasicPipeline() {
 		}
 	}
 
+	// segment pair linear constraint generator
+	_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+
 	// add segment pairs from segmentPairExtractor, to problemAssembler
 	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
-	_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
+	//_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
+	_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
 
 
 	if (_groundTruth.isSet())

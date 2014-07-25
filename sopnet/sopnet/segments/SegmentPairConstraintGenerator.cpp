@@ -25,8 +25,8 @@ SegmentPairConstraintGenerator::updateOutputs(){
 }
 
 void
-SegmentPairExtractor::assembleLinearConstraints(){
-	LOG_DEBUG(segmentpairextractorlog) << "assembling linear constraints..." << std::endl;
+SegmentPairConstraintGenerator::assembleLinearConstraints(){
+	LOG_DEBUG(segmentpairconstraintgeneratorlog) << "assembling linear constraints..." << std::endl;
 
 	_linearConstraints->clear();
 
@@ -47,7 +47,7 @@ SegmentPairExtractor::assembleLinearConstraints(){
 }
 
 void
-SegmentPairExtractor::assembleLinearConstraint(boost::shared_ptr<SegmentPair> segmentPair,
+SegmentPairConstraintGenerator::assembleLinearConstraint(boost::shared_ptr<SegmentPair> segmentPair,
 		double coefSegmentPair, double coefSegment1, double coefSegment2, Relation relation, double value){
 
 	LinearConstraint constraint;

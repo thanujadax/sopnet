@@ -8,6 +8,7 @@
 #include <sopnet/inference/SegmentationCostFunctionParameters.h>
 #include <sopnet/segments/SegmentExtractionPipeline.h>
 #include <sopnet/segments/SegmentPairExtractor.h>
+#include <sopnet/segments/SegmentPairConstraintGenerator.h>
 
 
 // forward declarations
@@ -25,6 +26,7 @@ class Reconstructor;
 class SectionSelector;
 class SegmentEvaluator;
 class SegmentExtractor;
+class SegmentPairConstraintGenerator;
 class SegmentFeaturesExtractor;
 class SegmentRandomForestTrainer;
 class SegmentationCostFunction;
@@ -126,6 +128,8 @@ private:
 	boost::shared_ptr<SegmentExtractionPipeline>      	_synapseSegmentExtractorPipeline;
 
 	boost::shared_ptr<SegmentPairExtractor>      		_segmentPairExtractor;
+
+	boost::shared_ptr<SegmentPairConstraintGenerator>   _segmentPairConstraintGenerator;
 
 	// the problem assembler that collects all segments and linear constraints
 	boost::shared_ptr<ProblemAssembler>               	_problemAssembler;
