@@ -9,7 +9,7 @@
 #define SOPNET_SEGMENTS_SEGMENTPAIRDCG_H_
 
 #define OFFSET_FEATURE_ID 60
-#define OFFSET_THRESHOLD 0.3
+#define OFFSET_THRESHOLD 0
 
 #include <pipeline/all.h>
 #include <util/foreach.h>
@@ -20,7 +20,7 @@
 #include "Segments.h"
 #include "SegmentPair.h"
 
-class SegmentPairDCG : public pipeline::SimpleProcessNode<> {
+class SegmentPairDCG : public pipeline::ProcessNode {
 
 public:
 	SegmentPairDCG();

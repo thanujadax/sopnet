@@ -39,7 +39,7 @@ void
 SegmentPairDCG::SegmentPairSelector::updateOutputs(){
 /*	_segmentPairsOut->clear();
 	_segmentPairsOut->addSegments(_segmentPairsIn->getSegmentPairs());*/
-	selectSegmentPairs();
+	SegmentPairSelector::selectSegmentPairs();
 
 
 }
@@ -57,14 +57,17 @@ void
 SegmentPairDCG::SegmentPairSelector::selectSegmentPairs(){
 
 	_segmentPairsOut->clear();
+	LOG_DEBUG(segmentpairdcglog) << "selecting segment pairs ..." << std::endl;
+	LOG_DEBUG(segmentpairdcglog) << "number of features per each segment pair: " << _features->size() << std::endl;
 
 	// select the segment pairs to use, based on feature values
 	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segmentPairsIn->getSegmentPairs()) {
-
+		LOG_DEBUG(segmentpairdcglog) << "checking segment id: " << segmentPair->getId() << std::endl;
 		const std::vector<double>& features = _features->get(segmentPair->getId());
-
-		if(features[OFFSET_FEATURE_ID] < OFFSET_THRESHOLD){
+		LOG_DEBUG(segmentpairdcglog) << "feature value: " << features[OFFSET_FEATURE_ID] << std::endl;
+		if(features[OFFSET_FEATURE_ID] > OFFSET_THRESHOLD){
 			_segmentPairsOut->add(segmentPair);
+
 		}
 
 	}

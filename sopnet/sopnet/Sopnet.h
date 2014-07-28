@@ -9,6 +9,7 @@
 #include <sopnet/segments/SegmentExtractionPipeline.h>
 #include <sopnet/segments/SegmentPairExtractor.h>
 #include <sopnet/segments/SegmentPairConstraintGenerator.h>
+#include <sopnet/segments/SegmentPairDCG.h>
 
 
 // forward declarations
@@ -27,6 +28,7 @@ class SectionSelector;
 class SegmentEvaluator;
 class SegmentExtractor;
 class SegmentPairConstraintGenerator;
+class SegmentPairDCG;
 class SegmentFeaturesExtractor;
 class SegmentRandomForestTrainer;
 class SegmentationCostFunction;
@@ -130,6 +132,8 @@ private:
 	boost::shared_ptr<SegmentPairExtractor>      		_segmentPairExtractor;
 
 	boost::shared_ptr<SegmentPairConstraintGenerator>   _segmentPairConstraintGenerator;
+
+	boost::shared_ptr<SegmentPairDCG>					_segmentPairDCG;
 
 	// the problem assembler that collects all segments and linear constraints
 	boost::shared_ptr<ProblemAssembler>               	_problemAssembler;

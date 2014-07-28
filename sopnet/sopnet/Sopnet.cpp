@@ -72,6 +72,7 @@ Sopnet::Sopnet(
 		boost::shared_ptr<ProcessNode> problemWriter) :
 	_segmentPairExtractor(boost::make_shared<SegmentPairExtractor>()),
 	_segmentPairConstraintGenerator(boost::make_shared<SegmentPairConstraintGenerator>()),
+	_segmentPairDCG(boost::make_shared<SegmentPairDCG>()),
 	_problemAssembler(boost::make_shared<ProblemAssembler>()),
 	_segmentFeaturesExtractor(boost::make_shared<SegmentFeaturesExtractor>()),
 	_randomForestReader(boost::make_shared<RandomForestHdf5Reader>(optionRandomForestFile.as<std::string>())),
@@ -169,6 +170,7 @@ Sopnet::createBasicPipeline() {
 	_segmentPairExtractor->clearInputs("mitochondria segments");
 	_segmentPairExtractor->clearInputs("synapse segments");
 
+
 	bool finishLastSection = !_problemWriter;
 
 	LOG_DEBUG(sopnetlog) << "creating neuron segment part..." << std::endl;
@@ -223,11 +225,13 @@ Sopnet::createBasicPipeline() {
 		}
 	}
 
+	// segment pair DCG (delayed generation based on feature values)
+	_segmentPairDCG->setInput("segment pairs all",_segmentPairExtractor->getOutput("segment pairs"));
 	// segment pair linear constraint generator
-	_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+	_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairDCG->getOutput("segment pairs select"));
 
 	// add segment pairs from segmentPairExtractor, to problemAssembler
-	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+	_problemAssembler->setInput("segment pairs", _segmentPairDCG->getOutput("segment pairs select"));
 	//_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
 	_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
 
