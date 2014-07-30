@@ -19,8 +19,6 @@ SegmentPairDCG::SegmentPairDCG() :
 
 	_segmentPairsIn.registerCallback(&SegmentPairDCG::onInputSet, this);
 
-	_segmentPairSelector->setInput("features",_segmentPairFeatureExtractor->getOutput());
-	_segmentPairSelector->setInput("segment pairs all",_segmentPairsIn);
 
 }
 
@@ -49,6 +47,9 @@ SegmentPairDCG::onInputSet(const pipeline::InputSetBase&){
 	if (_segmentPairsIn.isSet()) {
 
 		_segmentPairFeatureExtractor->setInput("segments", _segmentPairsIn.getAssignedOutput());
+		_segmentPairSelector->setInput("features",_segmentPairFeatureExtractor->getOutput());
+		_segmentPairSelector->setInput("segment pairs all",_segmentPairsIn.getAssignedOutput());
+
 	}
 }
 
