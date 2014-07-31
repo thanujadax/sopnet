@@ -8,8 +8,8 @@
 #ifndef SOPNET_SEGMENTS_SEGMENTPAIRDCG_H_
 #define SOPNET_SEGMENTS_SEGMENTPAIRDCG_H_
 
-#define OFFSET_FEATURE_ID 60
-#define OFFSET_THRESHOLD 0
+#define OFFSET_FEATURE_ID 1
+#define OFFSET_THRESHOLD 0.0
 
 #include <pipeline/all.h>
 #include <util/foreach.h>
