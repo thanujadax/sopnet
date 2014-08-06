@@ -16,6 +16,7 @@ SegmentsStackPainter::SegmentsStackPainter(double gap) :
 	_showEnds(false),
 	_showContinuations(true),
 	_showBranches(false),
+	_showSegmentPairs(false),
 	_showSliceIds(true),
 	_focus(0, 0),
 	_zScale(15),
@@ -84,6 +85,16 @@ SegmentsStackPainter::showBranches(bool show) {
 }
 
 void
+SegmentsStackPainter::showSegmentPairs(bool show) {
+
+	LOG_DEBUG(segmentsstackpainterlog) << "showing segment pairs: " << show << std::endl;
+
+	_showSegmentPairs = show;
+
+	updateVisibleSegments();
+}
+
+void
 SegmentsStackPainter::showSliceIds(bool show) {
 
 	_showSliceIds = show;
@@ -124,6 +135,14 @@ SegmentsStackPainter::setFocus(const util::point<double>& focus) {
 	_closestPrevContinuationSegments = _segments->findContinuations(prevContinuation, 1000000000);
 	_closestNextContinuationSegments = _segments->findContinuations(nextContinuation, 1000000000);
 
+	// create dummy segment pairs for this slice
+	boost::shared_ptr<SegmentPair> prevSegmentPair = boost::make_shared<SegmentPair>(0, Left, dummySlice, dummySlice);
+	boost::shared_ptr<SegmentPair> nextSegmentPair = boost::make_shared<SegmentPair>(0, Right, dummySlice, dummySlice);
+
+	// find closest continuations to dummy SegmentPairs
+	_closestPrevSegmentPairs = _segments->findSegmentPairs(prevSegmentPair, 1000000000);
+	_closestNextSegmentPairs = _segments->findSegmentPairs(nextSegmentPair, 1000000000);
+
 	// create dummy branch segments for this slice
 	boost::shared_ptr<BranchSegment> prevBranch = boost::make_shared<BranchSegment>(0, Left, dummySlice, dummySlice, dummySlice);
 	boost::shared_ptr<BranchSegment> nextBranch = boost::make_shared<BranchSegment>(0, Right, dummySlice, dummySlice, dummySlice);
@@ -141,6 +160,8 @@ SegmentsStackPainter::setFocus(const util::point<double>& focus) {
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextContinuationSegments.size() << " next continuation segments" << std::endl;
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestPrevBranchSegments.size() << " prev branch segments" << std::endl;
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextBranchSegments.size() << " next branch segments" << std::endl;
+	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestPrevSegmentPairs.size() << " prev SegmentPairs" << std::endl;
+	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextSegmentPairs.size() << " next SegmentPairs" << std::endl;
 
 	updateVisibleSegments();
 }
@@ -175,6 +196,14 @@ SegmentsStackPainter::nextSegment() {
 			numSegments = _closestPrevBranchSegments.size();
 		else if (_showNext)
 			numSegments = _closestNextBranchSegments.size();
+	}
+
+	if (_showSegmentPairs) {
+
+		if (_showPrev)
+			numSegments = _closestPrevSegmentPairs.size();
+		else if (_showNext)
+			numSegments = _closestNextSegmentPairs.size();
 	}
 
 	if (numSegments == 0)
@@ -262,6 +291,15 @@ SegmentsStackPainter::setCurrentSection(unsigned int section) {
 		_textures.load(*branch->getTargetSlice2());
 	}
 
+	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs()) {
+
+		size = sizeAddSlice(size, *segmentPair->getSourceSlice());
+		size = sizeAddSlice(size, *segmentPair->getTargetSlice());
+
+		_textures.load(*continuation->getSourceSlice());
+		_textures.load(*continuation->getTargetSlice());
+	}
+
 	_sectionHeight = size.height();
 
 	// for the only-one-segment mode, we show the segment partner slices above
@@ -294,6 +332,8 @@ SegmentsStackPainter::updateVisibleSegments() {
 			_prevSegments->add(_closestPrevContinuationSegments[_closestPrevSegment]);
 		else if (_showBranches && _closestPrevBranchSegments.size() > _closestPrevSegment)
 			_prevSegments->add(_closestPrevBranchSegments[_closestPrevSegment]);
+		else if (_showSegmentPairs && _closestPrevSegmentPairs.size() > _closestPrevSegment)
+			_prevSegments->add(_closestPrevSegmentPairs[_closestPrevSegment]);
 	}
 
 	if (_showNext) {
@@ -304,6 +344,8 @@ SegmentsStackPainter::updateVisibleSegments() {
 			_nextSegments->add(_closestNextContinuationSegments[_closestNextSegment]);
 		else if (_showBranches && _closestNextBranchSegments.size() > _closestNextSegment)
 			_nextSegments->add(_closestNextBranchSegments[_closestNextSegment]);
+		else if (_showSegmentPairs && _closestNextSegmentPairs.size() > _closestNextSegment)
+			_nextSegments->add(_closestNextSegmentPairs[_closestNextSegment]);
 	}
 }
 
