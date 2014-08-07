@@ -17,7 +17,10 @@ public:
 
 	SegmentPair(unsigned int id, Direction direction,
 			boost::shared_ptr<ContinuationSegment> continuationSegment1,
-			boost::shared_ptr<ContinuationSegment> continuationSegment2);
+			boost::shared_ptr<ContinuationSegment> continuationSegment2,
+			boost::shared_ptr<Slice> sourceSlice,
+			boost::shared_ptr<Slice> midSlice,
+			boost::shared_ptr<Slice> targetSlice);
 
 	boost::shared_ptr<ContinuationSegment> getContinuationSegment1() const;
 
@@ -25,11 +28,23 @@ public:
 
 	std::vector<boost::shared_ptr<Slice> > getSlices() const;
 
+	boost::shared_ptr<Slice> getSourceSlice() const;
+
+	boost::shared_ptr<Slice> getMidSlice() const;
+
+	boost::shared_ptr<Slice> getTargetSlice() const;
+
 private:
 
 	boost::shared_ptr<ContinuationSegment> _continuationSegment1;
 
 	boost::shared_ptr<ContinuationSegment> _continuationSegment2;
+
+	boost::shared_ptr<Slice> _sourceSlice;
+
+	boost::shared_ptr<Slice> _midSlice;
+
+	boost::shared_ptr<Slice> _targetSlice;
 
 };
 

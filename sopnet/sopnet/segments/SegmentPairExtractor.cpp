@@ -87,12 +87,18 @@ SegmentPairExtractor::extractSegmentPairs(boost::shared_ptr<ContinuationSegment>
 			if(nextSegment->getDirection() == Left){
 				if(segment->getSourceSlice() == nextSegment->getTargetSlice()) {
 					// this segment goes left, next segment goes left
-					addNextSegmentPair(Left,segment,nextSegment);
+					addNextSegmentPair(Left,segment,nextSegment,
+							segment->getTargetSlice(),
+							segment->getSourceSlice(),
+							nextSegment->getSourceSlice());
 				}
 			} else {
 				if(segment->getSourceSlice() == nextSegment->getSourceSlice()) {
 					// this segment goes left, next segment goes right
-					addNextSegmentPair(Left,segment,nextSegment);
+					addNextSegmentPair(Left,segment,nextSegment,
+							segment->getTargetSlice(),
+							segment->getSourceSlice(),
+							nextSegment->getTargetSlice());
 				}
 			}
 		} else {
@@ -100,12 +106,18 @@ SegmentPairExtractor::extractSegmentPairs(boost::shared_ptr<ContinuationSegment>
 			if(nextSegment->getDirection() == Left){
 				if(segment->getTargetSlice() == nextSegment->getTargetSlice()) {
 					// this segment goes right, next segment goes left
-					addNextSegmentPair(Right,segment,nextSegment);
+					addNextSegmentPair(Right,segment,nextSegment,
+							segment->getSourceSlice(),
+							segment->getTargetSlice(),
+							nextSegment->getSourceSlice());
 				}
 			} else {
 				if(segment->getTargetSlice() == nextSegment->getSourceSlice()) {
 					// this segment goes right, next segment goes right
-					addNextSegmentPair(Right,segment,nextSegment);
+					addNextSegmentPair(Right,segment,nextSegment,
+							segment->getSourceSlice(),
+							segment->getTargetSlice(),
+							nextSegment->getTargetSlice());
 				}
 			}
 
@@ -118,13 +130,19 @@ void
 SegmentPairExtractor::addNextSegmentPair(
 		Direction direction,
 		boost::shared_ptr<ContinuationSegment> segment1,
-		boost::shared_ptr<ContinuationSegment> segment2){
+		boost::shared_ptr<ContinuationSegment> segment2,
+		boost::shared_ptr<Slice> sourceSlice,
+		boost::shared_ptr<Slice> midSlice,
+		boost::shared_ptr<Slice> targetSlice){
 
 	boost::shared_ptr<SegmentPair> segmentPair = boost::make_shared<SegmentPair>(
 			Segment::getNextSegmentId(),
 			direction ,
 			segment1,
-			segment2);
+			segment2,
+			sourceSlice,
+			midSlice,
+			targetSlice);
 
 	_segmentPairs->add(segmentPair);
 }

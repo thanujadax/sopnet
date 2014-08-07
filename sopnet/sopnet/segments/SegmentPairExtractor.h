@@ -38,7 +38,10 @@ private:
 	void addNextSegmentPair(
 			Direction direction,
 			boost::shared_ptr<ContinuationSegment> segment1,
-			boost::shared_ptr<ContinuationSegment> segment2);
+			boost::shared_ptr<ContinuationSegment> segment2,
+			boost::shared_ptr<Slice> sourceSlice,
+			boost::shared_ptr<Slice> midSlice,
+			boost::shared_ptr<Slice> targetSlice);
 
 	void assembleLinearConstraints();
 	void assembleLinearConstraint(boost::shared_ptr<SegmentPair> segmentPair,
