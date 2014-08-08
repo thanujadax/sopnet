@@ -22,6 +22,8 @@ private:
 
 	void getFeatures(const BranchSegment& branch, std::vector<double>& slice);
 
+	void getFeatures(const SegmentPair& segmentPair, std::vector<double>& features);
+
 	std::vector<double> computeHistogram(const Slice& slice);
 
 	pipeline::Input<Segments> _segments;

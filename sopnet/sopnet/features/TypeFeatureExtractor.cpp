@@ -1,6 +1,7 @@
 #include <sopnet/segments/EndSegment.h>
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
+#include <sopnet/segments/SegmentPair.h>
 #include "TypeFeatureExtractor.h"
 
 logger::LogChannel typefeatureextractorlog("typefeatureextractorlog", "[TypeFeatureExtractor] ");
@@ -47,6 +48,13 @@ TypeFeatureExtractor::updateOutputs() {
 		_features->get(segment->getId())[1] = 0;
 		_features->get(segment->getId())[2] = 1;
 	}
+
+	foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs()) {
+
+			_features->get(segment->getId())[0] = 0;
+			_features->get(segment->getId())[1] = 0;
+			_features->get(segment->getId())[2] = 0;
+		}
 
 	LOG_ALL(typefeatureextractorlog) << "found features: " << *_features << std::endl;
 

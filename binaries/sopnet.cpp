@@ -148,6 +148,10 @@ util::ProgramOption optionGridSearch(
 		_long_name        = "gridSearch",
 		_description_text = "Preform a grid search.");
 
+util::ProgramOption optionDumpSegmentPairDetails(
+		util::_long_name        = "segmentPairDetailsDump",
+		util::_description_text = "Write segment pair details (constraints, component segments, features).");
+
 void processEvents(boost::shared_ptr<gui::Window>& window) {
 
 	LOG_USER(out) << " started as " << window->getCaption() << " at " << window.get() << std::endl;
@@ -652,11 +656,19 @@ int main(int optionc, char** optionv) {
 			LOG_USER(out) << "[main] files for structured learning written!" << std::endl;
 		}
 
+		if (optionDumpSegmentPairDetails) {
+
+			sopnet->dumpProblemDetails("./segPairProperties.txt", "./segPairConstraints.txt");
+
+			LOG_USER(out) << "[main] segment pair details files written!" << std::endl;
+		}
+
 		if (optionWriteMinimalImpactTED) {
 			
 			sopnet->writeMinimalImpactTEDCoefficients("./minimalImpactTEDcoefficients.txt");
 
 			LOG_USER(out) << "[main] file for minimal impact TED written!" << std::endl;
+
 		}
 
 		if (optionSaveResultDirectory) {

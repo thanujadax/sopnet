@@ -13,6 +13,7 @@ class RandomForestCostFunction : public pipeline::SimpleProcessNode<> {
 			(const std::vector<boost::shared_ptr<EndSegment> >&          ends,
 			 const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 			 const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
+			 const std::vector<boost::shared_ptr<SegmentPair> >&  segmentPairs,
 			 std::vector<double>& costs)>
 			costs_function_type;
 
@@ -28,6 +29,7 @@ private:
 			const std::vector<boost::shared_ptr<EndSegment> >&          ends,
 			const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 			const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
+			const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
 			std::vector<double>& costs);
 
 	double costs(const Segment& segment);

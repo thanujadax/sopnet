@@ -42,7 +42,11 @@ Reconstructor::updateReconstruction() {
 	foreach (boost::shared_ptr<BranchSegment> segment, _segments->getBranches())
 		probe(segment);
 
+	foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
+			probe(segment);
+
 	LOG_ALL(reconstructorlog) << std::endl;
+
 }
 
 template <typename SegmentType>

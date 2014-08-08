@@ -7,6 +7,10 @@
 #include <sopnet/inference/PriorCostFunctionParameters.h>
 #include <sopnet/inference/SegmentationCostFunctionParameters.h>
 #include <sopnet/segments/SegmentExtractionPipeline.h>
+#include <sopnet/segments/SegmentPairExtractor.h>
+#include <sopnet/segments/SegmentPairConstraintGenerator.h>
+#include <sopnet/segments/SegmentPairDCG.h>
+
 
 // forward declarations
 class GoldStandardExtractor;
@@ -23,11 +27,15 @@ class Reconstructor;
 class SectionSelector;
 class SegmentEvaluator;
 class SegmentExtractor;
+class SegmentPairConstraintGenerator;
+class SegmentPairDCG;
 class SegmentFeaturesExtractor;
 class SegmentRandomForestTrainer;
 class SegmentationCostFunction;
 class StructuredProblemWriter;
+class SegmentPairDetailsWriter;
 class MinimalImpactTEDWriter;
+
 template <typename Precision> class SliceExtractor;
 
 class Sopnet : public pipeline::SimpleProcessNode<> {
@@ -44,7 +52,9 @@ public:
 
 	void writeStructuredProblem(std::string filename_labels, std::string filename_features, std::string filename_constraints);
 
+	void dumpProblemDetails(std::string filename_segPairDetails, std::string filename_segPairConstraints);
 	void writeMinimalImpactTEDCoefficients(std::string filename);
+
 
 private:
 
@@ -60,7 +70,10 @@ private:
 
 	void createStructuredProblemPipeline();
 
+	void createSegmentPairDumpPipeline();
+
 	void createMinimalImpactTEDPipeline();
+
 
 	/**********
 	 * INPUTS *
@@ -116,8 +129,15 @@ private:
 
 	boost::shared_ptr<SegmentExtractionPipeline>      	_synapseSegmentExtractorPipeline;
 
+	boost::shared_ptr<SegmentPairExtractor>      		_segmentPairExtractor;
+
+	boost::shared_ptr<SegmentPairConstraintGenerator>   _segmentPairConstraintGenerator;
+
+	boost::shared_ptr<SegmentPairDCG>					_segmentPairDCG;
+
 	// the problem assembler that collects all segments and linear constraints
 	boost::shared_ptr<ProblemAssembler>               	_problemAssembler;
+
 
 	/*
 	 * inference part
@@ -159,8 +179,13 @@ private:
 	// a writer to produce output for structured learning
 	boost::shared_ptr<StructuredProblemWriter>		_spWriter;
 
+
+	// a writer to dump details of segment pairs
+	boost::shared_ptr<SegmentPairDetailsWriter>		_segmentPairDetailsWriter;
+
 	// a writer to write the coefficients for minimal imapact TED for structured learning
 	boost::shared_ptr<MinimalImpactTEDWriter>		_mitWriter;
+
 
 	/**************************
 	 * PROJECT INFRASTRUCTURE *

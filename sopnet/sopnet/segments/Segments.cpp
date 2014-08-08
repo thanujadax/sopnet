@@ -3,6 +3,7 @@
 std::vector<boost::shared_ptr<EndSegment> >          Segments::EmptyEnds;
 std::vector<boost::shared_ptr<ContinuationSegment> > Segments::EmptyContinuations;
 std::vector<boost::shared_ptr<BranchSegment> >       Segments::EmptyBranches;
+std::vector<boost::shared_ptr<SegmentPair> >         Segments::EmptySegmentPairs;
 
 Segments::~Segments() {
 
@@ -29,6 +30,11 @@ Segments::clear() {
 			delete branchTree;
 	_branchTrees.clear();
 
+	foreach (SegmentPairKdTree* segmentPairTree, _segmentPairTrees)
+		if (segmentPairTree)
+			delete segmentPairTree;
+	_segmentPairTrees.clear();
+
 	// delete all adaptors
 
 	foreach (EndSegmentVectorAdaptor* endVectorAdaptor, _endAdaptors)
@@ -46,11 +52,17 @@ Segments::clear() {
 			delete branchVectorAdaptor;
 	_branchAdaptors.clear();
 
+	foreach (SegmentPairVectorAdaptor* segmentPairVectorAdaptor, _segmentPairAdaptors)
+		if (segmentPairVectorAdaptor)
+			delete segmentPairVectorAdaptor;
+	_segmentPairAdaptors.clear();
+
 	// clear all segments
 
 	_ends.clear();
 	_continuations.clear();
 	_branches.clear();
+	_segmentPairs.clear();
 }
 
 void
@@ -70,6 +82,12 @@ Segments::resize(int numInterSectionInterval) {
 		_branchAdaptors.resize(numInterSectionInterval, 0);
 		_branchTrees.resize(numInterSectionInterval, 0);
 		_branchTreeDirty.resize(numInterSectionInterval, true);
+
+		_segmentPairs.resize(numInterSectionInterval);
+		_segmentPairAdaptors.resize(numInterSectionInterval, 0);
+		_segmentPairTrees.resize(numInterSectionInterval, 0);
+		_segmentPairTreeDirty.resize(numInterSectionInterval, true);
+
 }
 
 void
@@ -123,11 +141,29 @@ Segments::add(boost::shared_ptr<BranchSegment> branch) {
 }
 
 void
+Segments::add(boost::shared_ptr<SegmentPair> segmentPair) {
+
+	unsigned int interSectionInterval = segmentPair->getInterSectionInterval();
+
+	// resize the vector of trees to hold as many trees as we have inter-section
+	// intervals
+	if (_segmentPairTrees.size() < interSectionInterval + 1) {
+
+		resize(interSectionInterval + 1);
+	}
+
+	_segmentPairTreeDirty[interSectionInterval] = true;
+
+	_segmentPairs[interSectionInterval].push_back(segmentPair);
+}
+
+void
 Segments::addAll(boost::shared_ptr<Segments> segments) {
 
 	addAll(segments->getEnds());
 	addAll(segments->getContinuations());
 	addAll(segments->getBranches());
+	addAll(segments->getSegmentPairs());
 }
 
 std::vector<boost::shared_ptr<EndSegment> >&
@@ -155,6 +191,16 @@ Segments::getBranches(unsigned int interval) {
 		return EmptyBranches;
 
 	return _branches[interval];
+
+}
+
+std::vector<boost::shared_ptr<SegmentPair> >&
+Segments::getSegmentPairs(unsigned int interval) {
+
+	if (interval >= _segmentPairs.size())
+		return EmptySegmentPairs;
+
+	return _segmentPairs[interval];
 }
 
 std::vector<boost::shared_ptr<EndSegment> >
@@ -175,6 +221,12 @@ Segments::getBranches() const {
 	return get(_branches);
 }
 
+std::vector<boost::shared_ptr<SegmentPair> >
+Segments::getSegmentPairs() const {
+
+	return get(_segmentPairs);
+}
+
 std::vector<boost::shared_ptr<Segment> >
 Segments::getSegments() const {
 
@@ -183,6 +235,7 @@ Segments::getSegments() const {
 	std::vector<boost::shared_ptr<EndSegment> >          ends          = get(_ends);
 	std::vector<boost::shared_ptr<ContinuationSegment> > continuations = get(_continuations);
 	std::vector<boost::shared_ptr<BranchSegment> >       branches      = get(_branches);
+
 
 	std::copy(ends.begin(), ends.end(), std::back_inserter(allSegments));
 	std::copy(continuations.begin(), continuations.end(), std::back_inserter(allSegments));
@@ -200,9 +253,29 @@ Segments::getSegments(unsigned int interval) {
 	std::vector<boost::shared_ptr<ContinuationSegment> > continuations = getContinuations(interval);
 	std::vector<boost::shared_ptr<BranchSegment> >       branches      = getBranches(interval);
 
+
 	std::copy(ends.begin(), ends.end(), std::back_inserter(allSegments));
 	std::copy(continuations.begin(), continuations.end(), std::back_inserter(allSegments));
 	std::copy(branches.begin(), branches.end(), std::back_inserter(allSegments));
+
+	return allSegments;
+}
+
+std::vector<boost::shared_ptr<Segment> >
+Segments::getSegmentsComplex() const {
+
+	std::vector<boost::shared_ptr<Segment> > allSegments;
+
+	std::vector<boost::shared_ptr<EndSegment> >          ends          = get(_ends);
+	std::vector<boost::shared_ptr<ContinuationSegment> > continuations = get(_continuations);
+	std::vector<boost::shared_ptr<BranchSegment> >       branches      = get(_branches);
+	std::vector<boost::shared_ptr<SegmentPair> >         segmentPairs  = get(_segmentPairs);
+
+
+	std::copy(ends.begin(), ends.end(), std::back_inserter(allSegments));
+	std::copy(continuations.begin(), continuations.end(), std::back_inserter(allSegments));
+	std::copy(branches.begin(), branches.end(), std::back_inserter(allSegments));
+	std::copy(segmentPairs.begin(), segmentPairs.end(), std::back_inserter(allSegments));
 
 	return allSegments;
 }
@@ -229,6 +302,14 @@ Segments::findBranches(
 		double distance) {
 
 	return find(reference->getCenter(), reference->getInterSectionInterval(), distance, _branches, _branchAdaptors, _branchTrees, _branchTreeDirty);
+}
+
+std::vector<boost::shared_ptr<SegmentPair> >
+Segments::findSegmentPairs(
+		boost::shared_ptr<SegmentPair> reference,
+		double distance) {
+
+	return find(reference->getCenter(), reference->getInterSectionInterval(), distance, _segmentPairs, _segmentPairAdaptors, _segmentPairTrees, _segmentPairTreeDirty);
 }
 
 std::vector<boost::shared_ptr<EndSegment> >
@@ -258,6 +339,16 @@ Segments::findBranches(
 	return find(center, interSectionInterval, distance, _branches, _branchAdaptors, _branchTrees, _branchTreeDirty);
 }
 
+std::vector<boost::shared_ptr<SegmentPair> >
+Segments::findSegmentPairs(
+		const util::point<double>& center,
+		unsigned int interSectionInterval,
+		double distance) {
+
+	return find(center, interSectionInterval, distance, _segmentPairs, _segmentPairAdaptors, _segmentPairTrees, _segmentPairTreeDirty);
+}
+
+
 unsigned int
 Segments::getNumInterSectionIntervals() {
 
@@ -275,6 +366,9 @@ Segments::size() {
 		size += continuations.size();
 	foreach (std::vector<boost::shared_ptr<BranchSegment> > branches, _branches)
 		size += branches.size();
+
+	foreach (std::vector<boost::shared_ptr<SegmentPair> > segmentPairs, _segmentPairs)
+			size += segmentPairs.size();
 
 	return size;
 }

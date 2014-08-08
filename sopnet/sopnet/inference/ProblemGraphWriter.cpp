@@ -23,6 +23,7 @@ ProblemGraphWriter::ProblemGraphWriter() {
 	registerInput(_features, "features");
 	registerInput(_randomForestCostFunction, "segment cost function");
 	registerInput(_segmentationCostFunction, "segmentation cost function");
+	registerInput(_linearCostFunction, "linear cost function");
 }
 
 void
@@ -104,8 +105,8 @@ ProblemGraphWriter::writeSegments(const std::string& segmentsFile, int originSli
 	std::vector<double> randomForestCosts(_segments->size(), 0);
 	std::vector<double> segmentationCosts(_segments->size(), 0);
 
-	(*_randomForestCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), randomForestCosts );
-	(*_segmentationCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), segmentationCosts );
+	(*_randomForestCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), _segments->getSegmentPairs(), randomForestCosts );
+	(*_segmentationCostFunction)( _segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), _segments->getSegmentPairs(), segmentationCosts );
 
 	unsigned int counter = 0;
 	foreach (boost::shared_ptr<Segment> segment, _segments->getSegments()) {

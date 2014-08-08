@@ -10,6 +10,7 @@
 #include <sopnet/evaluation/GroundTruthExtractor.h>
 #include <sopnet/features/SegmentFeaturesExtractor.h>
 #include <sopnet/inference/ProblemGraphWriter.h>
+#include <sopnet/inference/SegmentPairDetailsWriter.h>
 #include <sopnet/inference/ObjectiveGenerator.h>
 #include <sopnet/inference/ProblemAssembler.h>
 #include <sopnet/inference/SubproblemsExtractor.h>
@@ -65,9 +66,13 @@ util::ProgramOption optionDecomposeProblem(
 		util::_description_text = "Decompose the problem into overlapping subproblems and solve them using SCALAR.",
 		util::_default_value    = false);
 
+
 Sopnet::Sopnet(
 		const std::string& projectDirectory,
 		boost::shared_ptr<ProcessNode> problemWriter) :
+	_segmentPairExtractor(boost::make_shared<SegmentPairExtractor>()),
+	_segmentPairConstraintGenerator(boost::make_shared<SegmentPairConstraintGenerator>()),
+	_segmentPairDCG(boost::make_shared<SegmentPairDCG>()),
 	_problemAssembler(boost::make_shared<ProblemAssembler>()),
 	_segmentFeaturesExtractor(boost::make_shared<SegmentFeaturesExtractor>()),
 	_randomForestReader(boost::make_shared<RandomForestHdf5Reader>(optionRandomForestFile.as<std::string>())),
@@ -79,6 +84,7 @@ Sopnet::Sopnet(
 	_goldStandardExtractor(boost::make_shared<GoldStandardExtractor>()),
 	_segmentRfTrainer(boost::make_shared<SegmentRandomForestTrainer>()),
 	_spWriter(boost::make_shared<StructuredProblemWriter>()),
+	_segmentPairDetailsWriter(boost::make_shared<SegmentPairDetailsWriter>()),
 	_mitWriter(boost::make_shared<MinimalImpactTEDWriter>()),
 	_projectDirectory(projectDirectory),
 	_problemWriter(problemWriter),
@@ -97,6 +103,7 @@ Sopnet::Sopnet(
 	registerInput(_segmentationCostFunctionParameters, "segmentation cost parameters");
 	registerInput(_priorCostFunctionParameters, "prior cost parameters");
 	registerInput(_forceExplanation, "force explanation");
+
 
 	// tell the outside world what we've got
 	registerOutput(_reconstructor->getOutput(), "solution");
@@ -142,7 +149,7 @@ Sopnet::createPipeline() {
 		createStructuredProblemPipeline();
 		createMinimalImpactTEDPipeline();
 	}
-
+	createSegmentPairDumpPipeline();
 	_pipelineCreated = true;
 }
 
@@ -158,6 +165,11 @@ Sopnet::createBasicPipeline() {
 	_problemAssembler->clearInputs("mitochondria linear constraints");
 	_problemAssembler->clearInputs("synapse segments");
 	_problemAssembler->clearInputs("synapse linear constraints");
+
+	_segmentPairExtractor->clearInputs("neuron segments");
+	_segmentPairExtractor->clearInputs("mitochondria segments");
+	_segmentPairExtractor->clearInputs("synapse segments");
+
 
 	bool finishLastSection = !_problemWriter;
 
@@ -184,6 +196,7 @@ Sopnet::createBasicPipeline() {
 	else if (_synapseSlices.isSet())
 		_synapseSegmentExtractorPipeline = boost::make_shared<SegmentExtractionPipeline>(_synapseSlices.getSharedPointer(), false, finishLastSection);
 
+
 	LOG_DEBUG(sopnetlog) << "feeding output into problem assembler..." << std::endl;
 
 	for (unsigned int i = 0; i < _neuronSegmentExtractorPipeline->numIntervals(); i++) {
@@ -192,18 +205,36 @@ Sopnet::createBasicPipeline() {
 		_problemAssembler->addInput("neuron segments", _neuronSegmentExtractorPipeline->getSegments(i));
 		_problemAssembler->addInput("neuron linear constraints", _neuronSegmentExtractorPipeline->getConstraints(i));
 
+		_segmentPairExtractor->addInput("neuron segments", _neuronSegmentExtractorPipeline->getSegments(i));
+
 		if (_mitochondriaSegmentExtractorPipeline) {
 
 			_problemAssembler->addInput("mitochondria segments", _mitochondriaSegmentExtractorPipeline->getSegments(i));
 			_problemAssembler->addInput("mitochondria linear constraints", _mitochondriaSegmentExtractorPipeline->getConstraints(i));
+
+			_segmentPairExtractor->addInput("mitochondria segments", _mitochondriaSegmentExtractorPipeline->getSegments(i));
+
 		}
 
 		if (_synapseSegmentExtractorPipeline) {
 
 			_problemAssembler->addInput("synapse segments", _synapseSegmentExtractorPipeline->getSegments(i));
 			_problemAssembler->addInput("synapse linear constraints", _synapseSegmentExtractorPipeline->getConstraints(i));
+
+			_segmentPairExtractor->addInput("synapse segments", _synapseSegmentExtractorPipeline->getSegments(i));
 		}
 	}
+
+	// segment pair DCG (delayed generation based on feature values)
+	_segmentPairDCG->setInput("segment pairs all",_segmentPairExtractor->getOutput("segment pairs"));
+	// segment pair linear constraint generator
+	_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairDCG->getOutput("segment pairs select"));
+
+	// add segment pairs from segmentPairExtractor, to problemAssembler
+	_problemAssembler->setInput("segment pairs", _segmentPairDCG->getOutput("segment pairs select"));
+	//_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
+	_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
+
 
 	if (_groundTruth.isSet())
 		_groundTruthExtractor->setInput(_groundTruth);
@@ -340,6 +371,15 @@ Sopnet::createStructuredProblemPipeline() {
 }
 
 void
+Sopnet::createSegmentPairDumpPipeline(){
+
+	_segmentPairDetailsWriter->setInput("segments", _problemAssembler->getOutput("segments"));
+	_segmentPairDetailsWriter->setInput("problem configuration", _problemAssembler->getOutput("problem configuration"));
+	_segmentPairDetailsWriter->setInput("features", _segmentFeaturesExtractor->getOutput("all features"));
+	_segmentPairDetailsWriter->setInput("linear constraints", _problemAssembler->getOutput("linear constraints"));
+}
+
+void
 Sopnet::writeStructuredProblem(std::string filename_labels, std::string filename_features, std::string filename_constraints) {
 
 	LOG_DEBUG(sopnetlog) << "requested to write structured problem, updating inputs" << std::endl;
@@ -353,6 +393,24 @@ Sopnet::writeStructuredProblem(std::string filename_labels, std::string filename
 	LOG_DEBUG(sopnetlog) << "writing structured learning files" << std::endl;
 
 	_spWriter->write(filename_labels, filename_features, filename_constraints);
+}
+
+void
+
+Sopnet::dumpProblemDetails(std::string filename_segPairProperties, std::string filename_segPairConstraints){
+
+	LOG_DEBUG(sopnetlog) << "requested to dump problem details, updating inputs" << std::endl;
+
+	updateInputs();
+
+	LOG_DEBUG(sopnetlog) << "creating internal pipeline, if not created yet" << std::endl;
+
+	createPipeline();
+
+	LOG_DEBUG(sopnetlog) << "dumping problem details (segment pairs) ..." << std::endl;
+
+	_segmentPairDetailsWriter->writeSegmentPairDetails(filename_segPairProperties, filename_segPairConstraints);
+
 }
 
 void
@@ -383,5 +441,6 @@ Sopnet::writeMinimalImpactTEDCoefficients(std::string filename) {
 	LOG_DEBUG(sopnetlog) << "writing minimal impact TED coefficient files..." << std::endl;
 
 	_mitWriter->write(filename);
+
 }
 

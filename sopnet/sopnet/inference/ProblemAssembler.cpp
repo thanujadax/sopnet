@@ -3,6 +3,7 @@
 #include <sopnet/segments/EndSegment.h>
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
+#include <sopnet/segments/SegmentPair.h>
 #include "ProblemAssembler.h"
 
 util::ProgramOption optionMaxMitochondriaNeuronDistance(
@@ -38,7 +39,7 @@ ProblemAssembler::ProblemAssembler() :
 	_allSynapseSegments(new Segments()),
 	_allLinearConstraints(new LinearConstraints()),
 	_problemConfiguration(new ProblemConfiguration()),
-	_overlap(false, false) {
+	_overlap(false, false){
 
 	registerInputs(_neuronSegments, "neuron segments");
 	registerInputs(_neuronLinearConstraints, "neuron linear constraints");
@@ -46,6 +47,8 @@ ProblemAssembler::ProblemAssembler() :
 	registerInputs(_mitochondriaLinearConstraints, "mitochondria linear constraints");
 	registerInputs(_synapseSegments, "synapse segments");
 	registerInputs(_synapseLinearConstraints, "synapse linear constraints");
+	registerInput(_segmentPairs, "segment pairs");
+	registerInput(_segmentPairLinearConstraints, "segment pair linear constraints");
 
 	registerOutput(_allSegments, "segments");
 	registerOutput(_allNeuronSegments, "neuron segments");
@@ -53,12 +56,15 @@ ProblemAssembler::ProblemAssembler() :
 	registerOutput(_allSynapseSegments, "synapse segments");
 	registerOutput(_allLinearConstraints, "linear constraints");
 	registerOutput(_problemConfiguration, "problem configuration");
+
 }
 
 void
 ProblemAssembler::updateOutputs() {
 
 	collectSegments();
+
+	collectSegmentPairs();
 
 	// make sure slices are used from both sides
 	addExplanationConstraints();
@@ -71,7 +77,11 @@ ProblemAssembler::updateOutputs() {
 
 	// make sure synapses are enclosed by a single neuron
 	addSynapseConstraints();
+
+	// make sure each segmentPair is bound to the corresponding pair of segments
+	addSegmentPairConstraints();
 }
+
 
 void
 ProblemAssembler::collectSegments() {
@@ -106,6 +116,19 @@ ProblemAssembler::collectSegments() {
 	}
 
 	LOG_DEBUG(problemassemblerlog) << "collected " << _allSegments->size() << " segments" << std::endl;
+}
+
+void
+ProblemAssembler::collectSegmentPairs(){
+
+	LOG_DEBUG(problemassemblerlog) << "collecting segment pairs..." << std::endl;
+
+	_allSegments->addAll(_segmentPairs);
+	_numSegmentPairs = _segmentPairs->size();
+
+	LOG_DEBUG(problemassemblerlog) << "collected " << _numSegmentPairs << " segment pairs" << std::endl;
+
+
 }
 
 void
@@ -294,6 +317,20 @@ ProblemAssembler::mapConstraints(boost::shared_ptr<LinearConstraints> linearCons
 	}
 }
 
+
+void
+ProblemAssembler::addSegmentPairConstraints() {
+	LOG_DEBUG(problemassemblerlog) << "adding segment-pair constraints..." << std::endl;
+
+	// set coefficients
+	foreach (boost::shared_ptr<SegmentPair> segment, _allSegments->getSegmentPairs())
+		setCoefficient(*segment);
+
+	 mapConstraints(_segmentPairLinearConstraints);
+
+	LOG_DEBUG(problemassemblerlog) << "added " << _segmentPairLinearConstraints->size() << " segment-pair constraints..." << std::endl;
+}
+
 void
 ProblemAssembler::setCoefficient(const EndSegment& end) {
 
@@ -381,6 +418,19 @@ ProblemAssembler::setCoefficient(const BranchSegment& branch) {
 }
 
 void
+ProblemAssembler::setCoefficient(const SegmentPair& segmentPair) {
+
+	/* We assigned a variable number (_numSegments) to every
+	 * segment we found. Remember this mapping -- we will need it to
+	 * transform the linear constraints on the segments and to
+	 * reconstruct the result.
+	 */
+	_problemConfiguration->setVariable(segmentPair, _numSegments);
+
+	_numSegments++;
+}
+
+void
 ProblemAssembler::extractSliceIdsMap() {
 
 	_numSlices = 0;
@@ -397,6 +447,7 @@ ProblemAssembler::extractSliceIdsMap() {
 
 	foreach (boost::shared_ptr<BranchSegment> segment, _allSegments->getBranches())
 		addSlices(*segment);
+
 }
 
 void

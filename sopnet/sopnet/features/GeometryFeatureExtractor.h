@@ -24,6 +24,8 @@ private:
 
 	void computeFeatures(const BranchSegment& branch, std::vector<double>& features);
 
+	void computeFeatures(const SegmentPair& segmentPair, std::vector<double>& features);
+
 	void updateOutputs();
 
 	pipeline::Input<Segments> _segments;

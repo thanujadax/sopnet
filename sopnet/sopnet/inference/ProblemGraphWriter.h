@@ -21,6 +21,7 @@ class ProblemGraphWriter : public pipeline::SimpleProcessNode<> {
 			(const std::vector<boost::shared_ptr<EndSegment> >&          ends,
 			 const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 			 const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
+			 const std::vector<boost::shared_ptr<SegmentPair> >&       segmentPairs,
 			 std::vector<double>& costs)>
 			costs_function_type;
 
@@ -57,6 +58,7 @@ private:
 
 	void writeSegment(const Segment& segment, std::ofstream& out, int originSection, int targetSection);
 
+
 	// all extracted segments
 	pipeline::Input<Segments> _segments;
 
@@ -73,9 +75,11 @@ private:
 
 	pipeline::Input<costs_function_type> _randomForestCostFunction;
 	pipeline::Input<costs_function_type> _segmentationCostFunction;
+	pipeline::Input<costs_function_type> _linearCostFunction;
 
 	std::map<unsigned int, double> _randomForestCostMap;
 	std::map<unsigned int, double> _segmentationCostMap;
+	std::map<unsigned int, double> _linearCostMap;
 
 	
 };
