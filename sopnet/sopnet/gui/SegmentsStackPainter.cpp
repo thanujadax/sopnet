@@ -446,20 +446,19 @@ SegmentsStackPainter::draw(
 
 		drawSlice(
 				*segmentPair->getSourceSlice(),
-				(segmentPair->getDirection() == Right ? -_zScale : 0.0),
-				0.0, 1.0, 0.0, 0.85,
-				roi, resolution);
-
-// TODO check 2nd argument
-		drawSlice(
-				*segmentPair->getMidSlice(),
 				-_zScale,
 				0.0, 1.0, 0.0, 0.85,
 				roi, resolution);
 
 		drawSlice(
+				*segmentPair->getMidSlice(),
+				0.0,
+				0.0, 1.0, 0.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
 				*segmentPair->getTargetSlice(),
-				(segmentPair->getDirection() == Left  ? -_zScale : 0.0),
+				_zScale,
 				0.0, 1.0, 0.0, 0.85,
 				roi, resolution);
 
@@ -530,20 +529,19 @@ SegmentsStackPainter::draw(
 
 		drawSlice(
 				*segmentPair->getSourceSlice(),
-				(segmentPair->getDirection() == Left  ? _zScale : 0.0),
-				0.0, 0.0, 1.0, 0.85,
-				roi, resolution);
-
-		// TODO 2nd arg
-		drawSlice(
-				*segmentPair->getMidSlice(),
 				-_zScale,
 				0.0, 0.0, 1.0, 0.85,
 				roi, resolution);
 
 		drawSlice(
+				*segmentPair->getMidSlice(),
+				0.0,
+				0.0, 0.0, 1.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
 				*segmentPair->getTargetSlice(),
-				(segmentPair->getDirection() == Right ? _zScale : 0.0),
+				_zScale,
 				0.0, 0.0, 1.0, 0.85,
 				roi, resolution);
 
