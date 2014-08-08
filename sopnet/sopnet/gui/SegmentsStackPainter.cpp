@@ -451,7 +451,7 @@ SegmentsStackPainter::draw(
 // TODO check 2nd argument
 		drawSlice(
 				*segmentPair->getMidSlice(),
-				0.0,
+				-_zScale,
 				0.0, 1.0, 0.0, 0.85,
 				roi, resolution);
 
@@ -535,7 +535,7 @@ SegmentsStackPainter::draw(
 		// TODO 2nd arg
 		drawSlice(
 				*segmentPair->getMidSlice(),
-				0.0,
+				-_zScale,
 				0.0, 0.0, 1.0, 0.85,
 				roi, resolution);
 
