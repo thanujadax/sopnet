@@ -225,15 +225,14 @@ Sopnet::createBasicPipeline() {
 		}
 	}
 
-	// segment pair DCG (delayed generation based on feature values)
-	_segmentPairDCG->setInput("segment pairs all",_segmentPairExtractor->getOutput("segment pairs"));
 	// segment pair linear constraint generator
-	_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairDCG->getOutput("segment pairs select"));
+	_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 
 	// add segment pairs from segmentPairExtractor, to problemAssembler
-	_problemAssembler->setInput("segment pairs", _segmentPairDCG->getOutput("segment pairs select"));
+	_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 	//_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
 	_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
+
 
 
 	if (_groundTruth.isSet())
