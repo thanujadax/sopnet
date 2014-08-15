@@ -18,6 +18,7 @@ public:
 		registerInput(_sliceErrors, "slice errors");
 		registerInput(_variationOfInformation, "variation of information", pipeline::Optional);
 		registerInput(_tedErrors, "tolerant edit distance errors", pipeline::Optional);
+		registerInput(_hammingDistance, "hamming distance",pipeline::Optional);
 		registerOutput(_painter, "painter");
 
 		_painter.registerSlot(_sizeChanged);
@@ -38,7 +39,7 @@ private:
 					(_sliceErrors->numFalsePositives() +
 					 _sliceErrors->numFalseNegatives() +
 					 _sliceErrors->numFalseSplits() +
-					 _sliceErrors->numFalseMerges());
+					 _sliceErrors->numFalseMerges()) << std::endl;
 
 		if (_variationOfInformation.isSet())
 			ss
@@ -53,6 +54,10 @@ private:
 				<< "splits: " << _tedErrors->getNumSplits() << ", "
 				<< "merges: " << _tedErrors->getNumMerges() << std::endl;
 
+		if(_hammingDistance.isSet())
+			ss << "Hamming Distance: " << *_hammingDistance << std::endl;
+
+
 		_painter->setText(ss.str());
 
 		_sizeChanged(_painter->getSize());
@@ -61,6 +66,7 @@ private:
 	pipeline::Input<SliceErrors>       _sliceErrors;
 	pipeline::Input<double>            _variationOfInformation;
 	pipeline::Input<Errors>		   _tedErrors;
+	pipeline::Input<unsigned int>		_hammingDistance;
 	pipeline::Output<gui::TextPainter> _painter;
 
 	signals::Slot<const gui::SizeChanged> _sizeChanged;

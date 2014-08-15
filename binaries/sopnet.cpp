@@ -517,7 +517,7 @@ int main(int optionc, char** optionv) {
 			boost::shared_ptr<NamedView>    namedView    = boost::make_shared<NamedView>("Result:");
 
 			if (optionShowErrors)
-				resultView->setInput("slice errors", resultEvaluator->getOutput());
+				resultView->setInput("slice errors", resultEvaluator->getOutput("slice errors"));
 
 			resultView->setInput(sopnet->getOutput("solution"));
 			rotateView->setInput(resultView->getOutput());
@@ -578,7 +578,7 @@ int main(int optionc, char** optionv) {
 
 			neuronsView->setInput(neuronExtractor->getOutput());
 			if (optionShowErrors)
-				neuronsView->setInput("slice errors", resultEvaluator->getOutput());
+				neuronsView->setInput("slice errors", resultEvaluator->getOutput("slice errors"));
 			namedView->setInput(neuronsView->getOutput());
 
 			controlContainer->addInput(namedView->getOutput());
@@ -604,7 +604,8 @@ int main(int optionc, char** optionv) {
 				variationOfInformation->setInput("stack 1", groundTruthReader->getOutput());
 				variationOfInformation->setInput("stack 2", resultIdMapCreator->getOutput());
 
-				errorsView->setInput("slice errors", resultEvaluator->getOutput());
+				errorsView->setInput("slice errors", resultEvaluator->getOutput("slice errors"));
+				errorsView->setInput("hamming distance", resultEvaluator->getOutput("hamming distance"));
 				errorsView->setInput("variation of information", variationOfInformation->getOutput());
 				errorsView->setInput("tolerant edit distance errors", tolerantEditDistance->getOutput("errors"));
 				namedView->setInput(errorsView->getOutput());
