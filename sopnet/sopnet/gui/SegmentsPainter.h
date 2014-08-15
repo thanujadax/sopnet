@@ -35,6 +35,8 @@ public:
 
 	void showBranches(bool show);
 
+	void showSegmentPairs(bool show);
+
 private:
 
 	void loadTextures();
@@ -45,6 +47,8 @@ private:
 
 	void loadTextures(const BranchSegment& branch);
 
+	void loadTextures(const SegmentPair& segmentPair);
+
 	void loadTexture(const Slice& slice);
 
 	void updateRecording();
@@ -54,6 +58,8 @@ private:
 	void draw(const ContinuationSegment& continuation);
 
 	void draw(const BranchSegment& branch);
+
+	void draw(const SegmentPair& segmentPair);
 
 	void drawSlice(boost::shared_ptr<Slice> slice, double red, double green, double blue);
 
@@ -80,6 +86,7 @@ private:
 	bool _showEnds;
 	bool _showContinuations;
 	bool _showBranches;
+	bool _showSegmentPairs;
 };
 
 #endif // CELLTRACKER_GUI_TRACKLETS_PAINTER_H__

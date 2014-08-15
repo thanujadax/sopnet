@@ -16,6 +16,7 @@ SegmentsStackPainter::SegmentsStackPainter(double gap) :
 	_showEnds(false),
 	_showContinuations(true),
 	_showBranches(false),
+	_showSegmentPairs(false),
 	_showSliceIds(true),
 	_focus(0, 0),
 	_zScale(15),
@@ -84,6 +85,16 @@ SegmentsStackPainter::showBranches(bool show) {
 }
 
 void
+SegmentsStackPainter::showSegmentPairs(bool show) {
+
+	LOG_DEBUG(segmentsstackpainterlog) << "showing segment pairs: " << show << std::endl;
+
+	_showSegmentPairs = show;
+
+	updateVisibleSegments();
+}
+
+void
 SegmentsStackPainter::showSliceIds(bool show) {
 
 	_showSliceIds = show;
@@ -132,6 +143,18 @@ SegmentsStackPainter::setFocus(const util::point<double>& focus) {
 	_closestPrevBranchSegments = _segments->findBranches(prevBranch, 1000000000);
 	_closestNextBranchSegments = _segments->findBranches(nextBranch, 1000000000);
 
+	// create dummy segment pairs for this slice
+	boost::shared_ptr<ContinuationSegment> dummyContinuationSegment = boost::make_shared<ContinuationSegment>(0, Right, dummySlice, dummySlice);
+
+	boost::shared_ptr<SegmentPair> prevSegmentPair = boost::make_shared<SegmentPair>(0, Left,
+			dummyContinuationSegment, dummyContinuationSegment, dummySlice, dummySlice, dummySlice);
+	boost::shared_ptr<SegmentPair> nextSegmentPair = boost::make_shared<SegmentPair>(0, Right,
+			dummyContinuationSegment, dummyContinuationSegment, dummySlice, dummySlice,dummySlice);
+
+	// find closest segment pairs to dummy segment pairs
+	_closestPrevSegmentPairs = _segments->findSegmentPairs(prevSegmentPair, 1000000000);
+	_closestNextSegmentPairs = _segments->findSegmentPairs(nextSegmentPair, 1000000000);
+
 	_closestPrevSegment = 0;
 	_closestNextSegment = 0;
 
@@ -141,6 +164,8 @@ SegmentsStackPainter::setFocus(const util::point<double>& focus) {
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextContinuationSegments.size() << " next continuation segments" << std::endl;
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestPrevBranchSegments.size() << " prev branch segments" << std::endl;
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextBranchSegments.size() << " next branch segments" << std::endl;
+	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestPrevSegmentPairs.size() << " prev segment pairs" << std::endl;
+	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextSegmentPairs.size() << " next segment pairs" << std::endl;
 
 	updateVisibleSegments();
 }
@@ -175,6 +200,14 @@ SegmentsStackPainter::nextSegment() {
 			numSegments = _closestPrevBranchSegments.size();
 		else if (_showNext)
 			numSegments = _closestNextBranchSegments.size();
+	}
+
+	if (_showSegmentPairs) {
+
+		if (_showPrev)
+			numSegments = _closestPrevSegmentPairs.size();
+		else if (_showNext)
+			numSegments = _closestNextSegmentPairs.size();
 	}
 
 	if (numSegments == 0)
@@ -262,6 +295,17 @@ SegmentsStackPainter::setCurrentSection(unsigned int section) {
 		_textures.load(*branch->getTargetSlice2());
 	}
 
+	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs()) {
+
+		size = sizeAddSlice(size, *segmentPair->getSourceSlice());
+		size = sizeAddSlice(size, *segmentPair->getMidSlice());
+		size = sizeAddSlice(size, *segmentPair->getTargetSlice());
+
+		_textures.load(*segmentPair->getSourceSlice());
+		_textures.load(*segmentPair->getTargetSlice());
+		_textures.load(*segmentPair->getTargetSlice());
+	}
+
 	_sectionHeight = size.height();
 
 	// for the only-one-segment mode, we show the segment partner slices above
@@ -294,6 +338,9 @@ SegmentsStackPainter::updateVisibleSegments() {
 			_prevSegments->add(_closestPrevContinuationSegments[_closestPrevSegment]);
 		else if (_showBranches && _closestPrevBranchSegments.size() > _closestPrevSegment)
 			_prevSegments->add(_closestPrevBranchSegments[_closestPrevSegment]);
+		else if (_showSegmentPairs && _closestPrevSegmentPairs.size() > _closestPrevSegment)
+			_prevSegments->add(_closestPrevSegmentPairs[_closestPrevSegment]);
+
 	}
 
 	if (_showNext) {
@@ -304,6 +351,9 @@ SegmentsStackPainter::updateVisibleSegments() {
 			_nextSegments->add(_closestNextContinuationSegments[_closestNextSegment]);
 		else if (_showBranches && _closestNextBranchSegments.size() > _closestNextSegment)
 			_nextSegments->add(_closestNextBranchSegments[_closestNextSegment]);
+		else if (_showSegmentPairs && _closestNextSegmentPairs.size() > _closestNextSegment)
+			_nextSegments->add(_closestNextSegmentPairs[_closestNextSegment]);
+
 	}
 }
 
@@ -327,6 +377,8 @@ bool
 SegmentsStackPainter::draw(
 		const util::rect<double>&  roi,
 		const util::point<double>& resolution) {
+
+	gui::OpenGl::Guard guard;
 
 	LOG_ALL(segmentsstackpainterlog) << "redrawing section " << _section << std::endl;
 
@@ -383,6 +435,31 @@ SegmentsStackPainter::draw(
 				*branch->getTargetSlice2(),
 				(branch->getDirection() == Left  ? -_zScale : 0.0),
 				0.0, 0.0, 1.0, 0.85,
+				roi, resolution);
+
+		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
+	}
+
+	foreach (boost::shared_ptr<SegmentPair> segmentPair, _prevSegments->getSegmentPairs()) {
+
+		LOG_ALL(segmentsstackpainterlog) << "drawing a segmentPair..." << std::endl;
+
+		drawSlice(
+				*segmentPair->getSourceSlice(),
+				-_zScale,
+				0.0, 1.0, 0.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
+				*segmentPair->getMidSlice(),
+				0.0,
+				0.0, 1.0, 0.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
+				*segmentPair->getTargetSlice(),
+				_zScale,
+				0.0, 1.0, 0.0, 0.85,
 				roi, resolution);
 
 		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
@@ -446,6 +523,31 @@ SegmentsStackPainter::draw(
 		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
 	}
 
+	foreach (boost::shared_ptr<SegmentPair> segmentPair, _nextSegments->getSegmentPairs()) {
+
+		LOG_ALL(segmentsstackpainterlog) << "drawing a segmentPair ..." << std::endl;
+
+		drawSlice(
+				*segmentPair->getSourceSlice(),
+				-_zScale,
+				0.0, 0.0, 1.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
+				*segmentPair->getMidSlice(),
+				0.0,
+				0.0, 0.0, 1.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
+				*segmentPair->getTargetSlice(),
+				_zScale,
+				0.0, 0.0, 1.0, 0.85,
+				roi, resolution);
+
+		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
+	}
+
 	return false;
 }
 
@@ -458,17 +560,10 @@ SegmentsStackPainter::drawSlice(
 		const util::rect<double>&  roi,
 		const util::point<double>& resolution) {
 
-	// set up lighting
-	GLfloat ambient[4] = { 0, 0, 0, 1 };
-	glCheck(glLightfv(GL_LIGHT0, GL_AMBIENT, ambient));
-	GLfloat diffuse[4] = { 0.1, 0.1, 0.1, 1 };
-	glCheck(glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse));
-	GLfloat specular[4] = { 0.1, 0.1, 0.1, 1 };
-	glCheck(glLightfv(GL_LIGHT0, GL_SPECULAR, specular));
-	glCheck(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)); GLfloat emission[4] = { 0, 0, 0, 1 };
-	glCheck(glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emission));
+	glCheck(glColor4f(red, green, blue, alpha));
 
-	// enable alpha blending
+	glCheck(glEnable(GL_TEXTURE_2D));
+
 	glCheck(glEnable(GL_BLEND));
 	glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
@@ -476,8 +571,7 @@ SegmentsStackPainter::drawSlice(
 	glCheck(glEnable(GL_LIGHTING));
 	glCheck(glEnable(GL_LIGHT0));
 	glCheck(glEnable(GL_COLOR_MATERIAL));
-
-	glCheck(glColor4f(red, green, blue, alpha));
+	glCheck(glDisable(GL_DEPTH_TEST));
 
 	_textures.get(slice.getId())->bind();
 
@@ -500,23 +594,13 @@ SegmentsStackPainter::drawSlice(
 		z = 0;
 	}
 
-	// left side
-	glTexCoord2d(1.0, 0.0); glNormal3d(0, 0, -1); glVertex3d(bb.maxX, bb.minY + offset, z);
-	glTexCoord2d(1.0, 1.0); glNormal3d(0, 0, -1); glVertex3d(bb.maxX, bb.maxY + offset, z);
-	glTexCoord2d(0.0, 1.0); glNormal3d(0, 0, -1); glVertex3d(bb.minX, bb.maxY + offset, z);
-	glTexCoord2d(0.0, 0.0); glNormal3d(0, 0, -1); glVertex3d(bb.minX, bb.minY + offset, z);
-
 	// right side
-	glTexCoord2d(0.0, 0.0); glNormal3d(0, 0, 1); glVertex3d(bb.minX, bb.minY + offset, z);
-	glTexCoord2d(0.0, 1.0); glNormal3d(0, 0, 1); glVertex3d(bb.minX, bb.maxY + offset, z);
-	glTexCoord2d(1.0, 1.0); glNormal3d(0, 0, 1); glVertex3d(bb.maxX, bb.maxY + offset, z);
-	glTexCoord2d(1.0, 0.0); glNormal3d(0, 0, 1); glVertex3d(bb.maxX, bb.minY + offset, z);
+	glTexCoord2d(0.0, 0.0); glNormal3d(0, 0, 1); glVertex3d(bb.minX, bb.minY + offset, 0);
+	glTexCoord2d(0.0, 1.0); glNormal3d(0, 0, 1); glVertex3d(bb.minX, bb.maxY + offset, 0);
+	glTexCoord2d(1.0, 1.0); glNormal3d(0, 0, 1); glVertex3d(bb.maxX, bb.maxY + offset, 0);
+	glTexCoord2d(1.0, 0.0); glNormal3d(0, 0, 1); glVertex3d(bb.maxX, bb.minY + offset, 0);
 
 	glCheck(glEnd());
-
-	glCheck(glDisable(GL_BLEND));
-	glCheck(glDisable(GL_LIGHTING));
-	glCheck(glDisable(GL_CULL_FACE));
 
 	if (_showSliceIds) {
 
@@ -527,9 +611,10 @@ SegmentsStackPainter::drawSlice(
 		double x = slice.getComponent()->getCenter().x;
 		double y = slice.getComponent()->getCenter().y + offset;
 
-		glTranslatef(x, y, z);
+		glPushMatrix();
+		glTranslatef(x, y, 0);
 		idPainter.draw(roi - util::point<double>(x, y), resolution);
-		glTranslatef(-x, -y, -z);
+		glPopMatrix();
 	}
 }
 
@@ -541,7 +626,9 @@ SegmentsStackPainter::getVisibleSegments(Segments& segments) {
 	segments.addAll(_prevSegments->getEnds());
 	segments.addAll(_prevSegments->getContinuations());
 	segments.addAll(_prevSegments->getBranches());
+	segments.addAll(_prevSegments->getSegmentPairs());
 	segments.addAll(_nextSegments->getEnds());
 	segments.addAll(_nextSegments->getContinuations());
 	segments.addAll(_nextSegments->getBranches());
+	segments.addAll(_nextSegments->getSegmentPairs());
 }

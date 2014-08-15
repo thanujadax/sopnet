@@ -5,6 +5,7 @@
 #include <sopnet/segments/EndSegment.h>
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
+#include <sopnet/segments/SegmentPair.h>
 #include <util/foreach.h>
 #include "SegmentsPainter.h"
 
@@ -15,7 +16,8 @@ SegmentsPainter::SegmentsPainter(std::string name) :
 	_zScale(10),
 	_showEnds(true),
 	_showContinuations(true),
-	_showBranches(true) {}
+	_showBranches(true),
+	_showSegmentPairs(true){}
 
 void
 SegmentsPainter::setImageStack(boost::shared_ptr<ImageStack> imageStack) {
@@ -31,6 +33,7 @@ SegmentsPainter::setSegments(boost::shared_ptr<Segments> segments) {
 	LOG_ALL(segmentspainterlog) << getName() << ": " << segments->getEnds().size() << " ends" << std::endl;
 	LOG_ALL(segmentspainterlog) << getName() << ": " << segments->getContinuations().size() << " continuations" << std::endl;
 	LOG_ALL(segmentspainterlog) << getName() << ": " << segments->getBranches().size() << " branches" << std::endl;
+	LOG_ALL(segmentspainterlog) << getName() << ": " << segments->getSegmentPairs().size() << " segmentPairs" << std::endl;
 
 	_segments = segments;
 
@@ -106,6 +109,24 @@ SegmentsPainter::showBranches(bool show) {
 }
 
 void
+SegmentsPainter::showSegmentPairs(bool show) {
+
+	LOG_ALL(segmentspainterlog) << getName() << ": show segmentPairs == " << show << std::endl;
+
+	_showSegmentPairs = show;
+
+	loadTextures();
+
+	_size = util::rect<double>(0, 0, 0, 0);
+
+	updateRecording();
+
+	LOG_ALL(segmentspainterlog) << getName() << ": size is " << _size << std::endl;
+
+	setSize(_size);
+}
+
+void
 SegmentsPainter::loadTextures() {
 
 	LOG_DEBUG(segmentspainterlog) << getName() << ": loading textures..." << std::endl;
@@ -124,6 +145,11 @@ SegmentsPainter::loadTextures() {
 
 	if (_showBranches) {
 		foreach (boost::shared_ptr<BranchSegment> segment, _segments->getBranches())
+			loadTextures(*segment);
+	}
+
+	if (_showSegmentPairs) {
+		foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
 			loadTextures(*segment);
 	}
 
@@ -152,6 +178,14 @@ SegmentsPainter::loadTextures(const BranchSegment& branch) {
 }
 
 void
+SegmentsPainter::loadTextures(const SegmentPair& segmentPair) {
+
+	loadTexture(*segmentPair.getSourceSlice());
+	loadTexture(*segmentPair.getMidSlice());
+	loadTexture(*segmentPair.getTargetSlice());
+}
+
+void
 SegmentsPainter::loadTexture(const Slice& slice) {
 
 	_textures.load(slice, _imageStack);
@@ -167,24 +201,11 @@ SegmentsPainter::updateRecording() {
 
 	startRecording();
 
-	GLfloat ambient[4] = { 0, 0, 0, 1 };
-	glCheck(glLightfv(GL_LIGHT0, GL_AMBIENT, ambient));
-	GLfloat diffuse[4] = { 0.1, 0.1, 0.1, 1 };
-	glCheck(glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse));
-	GLfloat specular[4] = { 0.1, 0.1, 0.1, 1 };
-	glCheck(glLightfv(GL_LIGHT0, GL_SPECULAR, specular));
-
-	glCheck(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular));
-	GLfloat emission[4] = { 0, 0, 0, 1 };
-	glCheck(glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emission));
-
 	// enable alpha blending
 	glCheck(glEnable(GL_BLEND));
 	glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 	glCheck(glEnable(GL_CULL_FACE));
-	glCheck(glEnable(GL_LIGHTING));
-	glCheck(glEnable(GL_LIGHT0));
 	glCheck(glEnable(GL_COLOR_MATERIAL));
 	glCheck(glDisable(GL_DEPTH_TEST));
 
@@ -214,6 +235,14 @@ SegmentsPainter::updateRecording() {
 			foreach (boost::shared_ptr<BranchSegment> segment, _segments->getBranches(i))
 				draw(*segment);
 		}
+
+		if (_showSegmentPairs) {
+
+			foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs(i))
+				draw(*segment);
+		}
+
+
 	}
 
 	// draw from back to front, facing to the left
@@ -238,10 +267,16 @@ SegmentsPainter::updateRecording() {
 			foreach (boost::shared_ptr<BranchSegment> segment, _segments->getBranches(i))
 				draw(*segment);
 		}
+
+		if (_showSegmentPairs) {
+
+			foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs(i))
+				draw(*segment);
+		}
+
 	}
 
 	glCheck(glDisable(GL_BLEND));
-	glCheck(glDisable(GL_LIGHTING));
 	glCheck(glDisable(GL_CULL_FACE));
 
 	stopRecording();
@@ -286,6 +321,22 @@ SegmentsPainter::draw(const BranchSegment& branch) {
 	drawLink(*branch.getSourceSlice(), *branch.getTargetSlice1(), 0.5, 0.5, 1.0);
 	drawLink(*branch.getSourceSlice(), *branch.getTargetSlice2(), 0.5, 0.5, 1.0);
 }
+
+void
+SegmentsPainter::draw(const SegmentPair& segmentPair) {
+
+	glCheck(glEnable(GL_TEXTURE_2D));
+
+	drawSlice(segmentPair.getSourceSlice(), 0.5, 0.5, 1.0);
+	drawSlice(segmentPair.getMidSlice(), 0.5, 0.5, 1.0);
+	drawSlice(segmentPair.getTargetSlice(), 0.5, 0.5, 1.0);
+
+	glCheck(glDisable(GL_TEXTURE_2D));
+
+	drawLink(*segmentPair.getSourceSlice(), *segmentPair.getMidSlice(), 0.5, 0.5, 1.0);
+	drawLink(*segmentPair.getMidSlice(), *segmentPair.getTargetSlice(), 0.5, 0.5, 1.0);
+}
+
 
 void
 SegmentsPainter::drawSlice(

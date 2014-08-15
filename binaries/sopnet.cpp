@@ -27,6 +27,7 @@
 #include <sopnet/Sopnet.h>
 #include <sopnet/evaluation/ResultEvaluator.h>
 #include <sopnet/evaluation/VariationOfInformation.h>
+#include <sopnet/evaluation/TolerantEditDistance.h>
 #include <sopnet/gui/ErrorsView.h>
 #include <sopnet/gui/FeaturesView.h>
 #include <sopnet/gui/NeuronsView.h>
@@ -37,7 +38,9 @@
 #include <sopnet/io/IdMapCreator.h>
 #include <sopnet/io/NeuronsImageWriter.h>
 #include <sopnet/inference/GridSearch.h>
+#include <sopnet/inference/ObjectiveGenerator.h>
 #include <sopnet/neurons/NeuronExtractor.h>
+#include <sopnet/training/GoldStandardCostFunction.h>
 #include <util/ProgramOptions.h>
 #include <util/SignalHandler.h>
 
@@ -452,6 +455,7 @@ int main(int optionc, char** optionv) {
 			rotateView->setInput(segmentsView->getOutput());
 
 			container->addInput(overlay->getOutput());
+
 			if (optionShowSegmentFeatures) {
 
 				boost::shared_ptr<FeaturesView> featuresView = boost::make_shared<FeaturesView>();
@@ -459,8 +463,27 @@ int main(int optionc, char** optionv) {
 				featuresView->setInput("features", sopnet->getOutput("all features"));
 				featuresView->setInput("problem configuration", sopnet->getOutput("problem configuration"));
 				featuresView->setInput("objective", sopnet->getOutput("objective"));
+
+				if (optionShowGoldStandard) {
+
+					// here we re-create the objective for the gold standard, to 
+					// avoid having to pass it through Sopnet just for the 
+					// visualization
+
+					pipeline::Process<GoldStandardCostFunction> goldStandardCostFunction;
+					pipeline::Process<ObjectiveGenerator>       objectiveGenerator;
+
+					goldStandardCostFunction->setInput("ground truth", groundTruthReader->getOutput());
+
+					objectiveGenerator->setInput("segments", sopnet->getOutput("segments"));
+					objectiveGenerator->addInput("cost functions", goldStandardCostFunction->getOutput());
+
+					featuresView->setInput("ground truth score", objectiveGenerator->getOutput());
+				}
+
 				container->addInput(featuresView->getOutput());
 			}
+
 			container->addInput(rotateView->getOutput());
 
 			namedView->setInput(container->getOutput());
@@ -505,31 +528,31 @@ int main(int optionc, char** optionv) {
 
 		if (optionShowGroundTruth) {
 
-			boost::shared_ptr<SegmentsView> groundTruthView = boost::make_shared<SegmentsView>("ground truth");
-			boost::shared_ptr<RotateView>   gtRotateView    = boost::make_shared<RotateView>();
-			boost::shared_ptr<NamedView>    namedView       = boost::make_shared<NamedView>("Ground-truth:");
+			boost::shared_ptr<NeuronExtractor>  gtNeuronExtractor = boost::make_shared<NeuronExtractor>();
+			boost::shared_ptr<NeuronsStackView> groundTruthView   = boost::make_shared<NeuronsStackView>();
+			boost::shared_ptr<NamedView>        namedView         = boost::make_shared<NamedView>("Ground-truth:");
 
-			if (optionShowErrors)
-				groundTruthView->setInput("slice errors", resultEvaluator->getOutput());
+			//if (optionShowErrors)
+				//groundTruthView->setInput("slice errors", resultEvaluator->getOutput());
 
-			groundTruthView->setInput(sopnet->getOutput("ground truth segments"));
-			groundTruthView->setInput("raw sections", rawSectionsReader->getOutput());
-			gtRotateView->setInput(groundTruthView->getOutput());
-			namedView->setInput(gtRotateView->getOutput());
+			gtNeuronExtractor->setInput(sopnet->getOutput("ground truth segments"));
+			groundTruthView->setInput(gtNeuronExtractor->getOutput());
+			namedView->setInput(groundTruthView->getOutput());
 
 			segmentsContainer->addInput(namedView->getOutput());
 		}
 
+		boost::shared_ptr<NeuronExtractor> gsNeuronExtractor;
+
 		if (optionShowGoldStandard) {
 
-			boost::shared_ptr<SegmentsView> goldstandardView = boost::make_shared<SegmentsView>("gold standard");
-			boost::shared_ptr<RotateView>   gsRotateView     = boost::make_shared<RotateView>();
-			boost::shared_ptr<NamedView>    namedView        = boost::make_shared<NamedView>("Gold Standard:");
+			gsNeuronExtractor = boost::make_shared<NeuronExtractor>();
+			boost::shared_ptr<NeuronsStackView> goldstandardView  = boost::make_shared<NeuronsStackView>();
+			boost::shared_ptr<NamedView>        namedView         = boost::make_shared<NamedView>("Gold Standard:");
 
-			goldstandardView->setInput(sopnet->getOutput("gold standard"));
-			goldstandardView->setInput("raw sections", rawSectionsReader->getOutput());
-			gsRotateView->setInput(goldstandardView->getOutput());
-			namedView->setInput(gsRotateView->getOutput());
+			gsNeuronExtractor->setInput(sopnet->getOutput("gold standard"));
+			goldstandardView->setInput(gsNeuronExtractor->getOutput());
+			namedView->setInput(goldstandardView->getOutput());
 
 			segmentsContainer->addInput(namedView->getOutput());
 		}
@@ -566,33 +589,54 @@ int main(int optionc, char** optionv) {
 
 		if (optionShowErrors && groundTruthReader) {
 
-			boost::shared_ptr<ErrorsView> errorsView = boost::make_shared<ErrorsView>();
-			boost::shared_ptr<NamedView>  namedView  = boost::make_shared<NamedView>("Errors:");
+			if (optionShowResult) {
 
-			resultEvaluator->setInput("result", sopnet->getOutput("solution"));
-			resultEvaluator->setInput("ground truth", sopnet->getOutput("ground truth segments"));
+				boost::shared_ptr<TolerantEditDistance> tolerantEditDistance = boost::make_shared<TolerantEditDistance>();
+				tolerantEditDistance->setInput("ground truth", groundTruthReader->getOutput());
+				tolerantEditDistance->setInput("reconstruction", resultIdMapCreator->getOutput());
 
-			variationOfInformation->setInput("stack 1", groundTruthReader->getOutput());
-			variationOfInformation->setInput("stack 2", resultIdMapCreator->getOutput());
+				boost::shared_ptr<ErrorsView> errorsView = boost::make_shared<ErrorsView>();
+				boost::shared_ptr<NamedView>  namedView  = boost::make_shared<NamedView>("Errors:");
 
-			errorsView->setInput("slice errors", resultEvaluator->getOutput());
-			errorsView->setInput("variation of information", variationOfInformation->getOutput());
-			namedView->setInput(errorsView->getOutput());
+				resultEvaluator->setInput("result", sopnet->getOutput("solution"));
+				resultEvaluator->setInput("ground truth", sopnet->getOutput("ground truth segments"));
 
-			resultContainer->addInput(namedView->getOutput());
+				variationOfInformation->setInput("stack 1", groundTruthReader->getOutput());
+				variationOfInformation->setInput("stack 2", resultIdMapCreator->getOutput());
 
-			// gold standard error
-			pipeline::Process<NamedView>       goldStandardNamedView("Error bounds with current hypotheses:");
-			pipeline::Process<ResultEvaluator> goldStandardEvaluator;
-			pipeline::Process<ErrorsView>      goldStandardErrorsView;
+				errorsView->setInput("slice errors", resultEvaluator->getOutput());
+				errorsView->setInput("variation of information", variationOfInformation->getOutput());
+				errorsView->setInput("tolerant edit distance errors", tolerantEditDistance->getOutput("errors"));
+				namedView->setInput(errorsView->getOutput());
 
-			goldStandardEvaluator->setInput("result", sopnet->getOutput("gold standard"));
-			goldStandardEvaluator->setInput("ground truth", sopnet->getOutput("ground truth segments"));
+				resultContainer->addInput(namedView->getOutput());
+			}
 
-			goldStandardErrorsView->setInput("slice errors", goldStandardEvaluator->getOutput());
-			goldStandardNamedView->setInput(goldStandardErrorsView->getOutput());
+			if (optionShowGoldStandard) {
 
-			resultContainer->addInput(goldStandardNamedView->getOutput());
+				// gold standard error
+				pipeline::Process<NamedView>       goldStandardNamedView("Error bounds with current hypotheses:");
+				pipeline::Process<ResultEvaluator> goldStandardEvaluator;
+				pipeline::Process<ErrorsView>      goldStandardErrorsView;
+
+				goldStandardEvaluator->setInput("result", sopnet->getOutput("gold standard"));
+				goldStandardEvaluator->setInput("ground truth", sopnet->getOutput("ground truth segments"));
+
+				boost::shared_ptr<IdMapCreator>         gsIdMapCreator       = boost::make_shared<IdMapCreator>();
+				boost::shared_ptr<TolerantEditDistance> tolerantEditDistance = boost::make_shared<TolerantEditDistance>();
+
+				gsIdMapCreator->setInput("neurons", gsNeuronExtractor->getOutput());
+				gsIdMapCreator->setInput("reference", rawSectionsReader->getOutput());
+
+				tolerantEditDistance->setInput("ground truth", groundTruthReader->getOutput());
+				tolerantEditDistance->setInput("reconstruction", gsIdMapCreator->getOutput());
+
+				goldStandardErrorsView->setInput("slice errors", goldStandardEvaluator->getOutput());
+				goldStandardErrorsView->setInput("tolerant edit distance errors", tolerantEditDistance->getOutput("errors"));
+				goldStandardNamedView->setInput(goldStandardErrorsView->getOutput());
+
+				resultContainer->addInput(goldStandardNamedView->getOutput());
+			}
 		}
 
 		if (optionTraining) {

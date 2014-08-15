@@ -96,6 +96,7 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showEnds(true);
 		_painter->showContinuations(false);
 		_painter->showBranches(false);
+		_painter->showSegmentPairs(false);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -106,6 +107,7 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showEnds(false);
 		_painter->showContinuations(true);
 		_painter->showBranches(false);
+		_painter->showSegmentPairs(false);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -116,6 +118,18 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showEnds(false);
 		_painter->showContinuations(false);
 		_painter->showBranches(true);
+		_painter->showSegmentPairs(false);
+
+		setDirty(_painter);
+		setDirty(_visibleSegments);
+	}
+
+	if (signal.key == gui::keys::P) {
+
+		_painter->showEnds(false);
+		_painter->showContinuations(false);
+		_painter->showBranches(false);
+		_painter->showSegmentPairs(true);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -126,6 +140,7 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showEnds(true);
 		_painter->showContinuations(true);
 		_painter->showBranches(true);
+		_painter->showSegmentPairs(true);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -143,14 +158,23 @@ SegmentsStackView::onMouseDown(gui::MouseDown& signal) {
 	if (!_painter->getSize().contains(signal.position))
 		return;
 
-	if (signal.button == gui::buttons::Left)
+	if (signal.button == gui::buttons::Left) {
+
 		_painter->setFocus(signal.position);
+		signal.processed = true;
+	}
 
-	if (signal.button == gui::buttons::WheelDown)
+	if (signal.button == gui::buttons::WheelDown) {
+
 		_painter->nextSegment();
+		signal.processed = true;
+	}
 
-	if (signal.button == gui::buttons::WheelUp)
+	if (signal.button == gui::buttons::WheelUp) {
+
 		_painter->prevSegment();
+		signal.processed = true;
+	}
 
 	setDirty(_painter);
 	setDirty(_visibleSegments);

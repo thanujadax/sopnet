@@ -26,6 +26,8 @@ FeaturesView::updateOutputs() {
 		segmentId = continuation->getId();
 	foreach (boost::shared_ptr<BranchSegment> branch, _segments->getBranches())
 		segmentId = branch->getId();
+	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs())
+			segmentId = segmentPair->getId();
 
 	const unsigned int variable = _problemConfiguration->getVariable(segmentId);
 
@@ -34,6 +36,6 @@ FeaturesView::updateOutputs() {
 	_painter->setFeatureNames(_features->getNames());
 	_painter->setSegmentId(segmentId);
 	if (_groundTruthScore.isSet())
-		_painter->setGroundTruthScore(_groundTruthScore.getSharedPointer());
+		_painter->setGroundTruthScore(_groundTruthScore->getCoefficients()[variable]);
 }
 
