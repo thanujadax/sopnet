@@ -5,6 +5,7 @@
 #include <pipeline/Process.h>
 #include <sopnet/segments/Segments.h>
 #include <sopnet/inference/Reconstructor.h>
+#include <sopnet/inference/Solution.h>
 #include <inference/LinearConstraints.h>
 #include <util/point.hpp>
 
@@ -23,6 +24,7 @@ private:
 	pipeline::Input<LinearConstraints> _allLinearConstraints;
 
 	pipeline::Process<Reconstructor> _reconstructor;
+	pipeline::Process<LinearSolver> _linearSolver;
 };
 
 #endif // SOPNET_GOLD_STANDARD_EXTRACTOR_H__

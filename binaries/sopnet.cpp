@@ -28,6 +28,7 @@
 #include <sopnet/evaluation/ResultEvaluator.h>
 #include <sopnet/evaluation/VariationOfInformation.h>
 #include <sopnet/evaluation/TolerantEditDistance.h>
+#include <sopnet/evaluation/HammingDistanceCalculator.h>
 #include <sopnet/gui/ErrorsView.h>
 #include <sopnet/gui/FeaturesView.h>
 #include <sopnet/gui/NeuronsView.h>
@@ -595,6 +596,10 @@ int main(int optionc, char** optionv) {
 				tolerantEditDistance->setInput("ground truth", groundTruthReader->getOutput());
 				tolerantEditDistance->setInput("reconstruction", resultIdMapCreator->getOutput());
 
+				boost::shared_ptr<HammingDistanceCalculator> hammingDistanceCalculator = boost::make_shared<HammingDistanceCalculator>();
+				hammingDistanceCalculator->setInput("gold standard solution", sopnet->getOutput("gold standard solution vector"));
+				hammingDistanceCalculator->setInput("solution", sopnet->getOutput("solution vector"));
+
 				boost::shared_ptr<ErrorsView> errorsView = boost::make_shared<ErrorsView>();
 				boost::shared_ptr<NamedView>  namedView  = boost::make_shared<NamedView>("Errors:");
 
@@ -605,7 +610,7 @@ int main(int optionc, char** optionv) {
 				variationOfInformation->setInput("stack 2", resultIdMapCreator->getOutput());
 
 				errorsView->setInput("slice errors", resultEvaluator->getOutput("slice errors"));
-				errorsView->setInput("hamming distance", resultEvaluator->getOutput("hamming distance"));
+				errorsView->setInput("hamming distance", hammingDistanceCalculator->getOutput("hamming distance"));
 				errorsView->setInput("variation of information", variationOfInformation->getOutput());
 				errorsView->setInput("tolerant edit distance errors", tolerantEditDistance->getOutput("errors"));
 				namedView->setInput(errorsView->getOutput());
@@ -622,6 +627,7 @@ int main(int optionc, char** optionv) {
 
 				goldStandardEvaluator->setInput("result", sopnet->getOutput("gold standard"));
 				goldStandardEvaluator->setInput("ground truth", sopnet->getOutput("ground truth segments"));
+
 
 				boost::shared_ptr<IdMapCreator>         gsIdMapCreator       = boost::make_shared<IdMapCreator>();
 				boost::shared_ptr<TolerantEditDistance> tolerantEditDistance = boost::make_shared<TolerantEditDistance>();

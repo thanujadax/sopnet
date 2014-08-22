@@ -112,9 +112,11 @@ Sopnet::Sopnet(
 	registerOutput(_objectiveGenerator->getOutput("objective"), "objective");
 	registerOutput(_groundTruthExtractor->getOutput("ground truth segments"), "ground truth segments");
 	registerOutput(_goldStandardExtractor->getOutput("gold standard"), "gold standard");
+	registerOutput(_goldStandardExtractor->getOutput("gold standard solution"), "gold standard solution vector");
 	registerOutput(_goldStandardExtractor->getOutput("negative samples"), "negative samples");
 	registerOutput(_segmentRfTrainer->getOutput("random forest"), "random forest");
 	registerOutput(_segmentFeaturesExtractor->getOutput("all features"), "all features");
+	registerOutput(_linearSolver->getOutput("solution"), "solution vector");
 }
 
 void
@@ -337,6 +339,7 @@ Sopnet::createInferencePipeline() {
 			// feed solution and segments to reconstructor
 			_reconstructor->setInput("solution", _linearSolver->getOutput("solution"));
 			_reconstructor->setInput("segments", _problemAssembler->getOutput("segments"));
+
 		}
 	}
 

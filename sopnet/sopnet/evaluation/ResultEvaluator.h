@@ -35,8 +35,6 @@ private:
 
 	std::vector<std::set<std::pair<int, int> > > findLinks(Segments& segments);
 
-	void getHammingDistance();
-
 	void insertSlice(
 			std::vector<std::set<boost::shared_ptr<Slice> > >& sliceSets,
 			boost::shared_ptr<Slice>                           slice);
@@ -71,9 +69,9 @@ private:
 
 	pipeline::Input<Segments> _result;
 	pipeline::Input<Segments> _groundTruth;
+	pipeline::Input<Segments> _goldStandard;
 
 	pipeline::Output<SliceErrors> _sliceErrors;
-	pipeline::Output<unsigned int> _hammingDistance;
 
 	unsigned int _numSections;
 

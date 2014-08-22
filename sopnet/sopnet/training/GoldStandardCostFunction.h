@@ -6,6 +6,7 @@
 #include <sopnet/features/Overlap.h>
 #include <sopnet/segments/Segments.h>
 
+
 // forward declarations
 class EndSegment;
 class ContinuationSegment;

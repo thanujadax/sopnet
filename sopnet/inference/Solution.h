@@ -2,6 +2,7 @@
 #define INFERENCE_SOLUTION_H__
 
 #include <pipeline/all.h>
+#include <vector>
 
 class Solution : public pipeline::Data {
 
@@ -18,6 +19,8 @@ public:
 	double& operator[](unsigned int i) { return _solution[i]; }
 
 	std::vector<double>& getVector() { return _solution; }
+
+	void assignSolution(std::vector<double> newSolution);
 
 private:
 

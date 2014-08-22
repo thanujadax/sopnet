@@ -13,13 +13,12 @@ util::ProgramOption optionEvaluatinMinOverlap(
 ResultEvaluator::ResultEvaluator(double minOverlap) :
 	_sliceErrors(new SliceErrors()),
 	_overlap(true /* normalize */, false /* don't align */),
-	_minOverlap(optionEvaluatinMinOverlap ? optionEvaluatinMinOverlap : minOverlap),
-	_hammingDistance(0) {
+	_minOverlap(optionEvaluatinMinOverlap ? optionEvaluatinMinOverlap : minOverlap) {
 
 	registerInput(_result, "result");
 	registerInput(_groundTruth, "ground truth");
+
 	registerOutput(_sliceErrors, "slice errors");
-	registerOutput(_hammingDistance, "hamming distance");
 
 }
 
@@ -179,6 +178,7 @@ ResultEvaluator::updateOutputs() {
 			<< minSliceErrors.numFalseNegatives() << " "
 			<< minSliceErrors.numFalseSplits() << " "
 			<< minSliceErrors.numFalseMerges() << std::endl;
+
 }
 
 ResultEvaluator::Mappings
@@ -581,49 +581,4 @@ ResultEvaluator::getInterSliceErrors(
 	interSliceErrors.falseSplits() = groundTruthLinks;
 
 	return interSliceErrors;
-}
-
-void
-ResultEvaluator::getHammingDistance(){
-	// calculate hamming distance of the solution between the gold standard and the result
-	// only considers the low level segments : ends, continuations and branches
-
-	LOG_DEBUG(resultevaluatorlog) << "Calculating Hamming distance ..." << std::endl;
-
-	unsigned int hammingDist_RG = 0;
-
-	foreach(boost::shared_ptr<EndSegment> end, _result.getEnds()){
-		if(!(_groundTruth->contains(end)))
-			hammingDist_RG = hammingDist_RG + 1;
-	}
-
-	foreach(boost::shared_ptr<ContinuationSegment> continuation, _result.getContinuations()){
-		if(!(_groundTruth->contains(continuation)))
-			hammingDist_RG = hammingDist_RG + 1;
-	}
-
-	foreach(boost::shared_ptr<BranchSegment> branch, _result.getBranches()){
-		if(!(_groundTruth->contains(branch)))
-			hammingDist_RG = hammingDist_RG + 1;
-	}
-
-	unsigned int hammingDist_GR = 0;
-
-	foreach(boost::shared_ptr<EndSegment> end, _groundTruth.getEnds()){
-		if(!(_result->contains(end)))
-			hammingDist_GR = hammingDist_GR + 1;
-	}
-
-	foreach(boost::shared_ptr<ContinuationSegment> continuation, _groundTruth.getContinuations()){
-		if(!(_result->contains(continuation)))
-			hammingDist_GR = hammingDist_GR + 1;
-	}
-
-	foreach(boost::shared_ptr<BranchSegment> branch, _groundTruth.getBranches()){
-		if(!(_result->contains(branch)))
-			hammingDist_GR = hammingDist_GR + 1;
-	}
-
-	LOG_DEBUG(resultevaluatorlog) << "Hamming distance: " << std::max(hammingDist_GR,hammingDist_RG) << std::endl;
-	*_hammingDistance =  std::max(hammingDist_GR,hammingDist_RG);
 }
