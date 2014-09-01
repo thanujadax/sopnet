@@ -28,10 +28,14 @@ private:
 
 	void calculateHammingDistance();
 
+	void calculateHammingDistanceLowLevel();
+
 	pipeline::Input<Solution> _goldStandard;
 	pipeline::Input<Solution> _result;
+	pipeline::Input<Segments> _allSegments;
 
 	pipeline::Output<unsigned int> _hammingDistance;
+	pipeline::Output<unsigned int> _hammingDistanceLowLevel;
 
 };
 
