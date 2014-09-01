@@ -19,6 +19,7 @@ public:
 		registerInput(_variationOfInformation, "variation of information", pipeline::Optional);
 		registerInput(_tedErrors, "tolerant edit distance errors", pipeline::Optional);
 		registerInput(_hammingDistance, "hamming distance",pipeline::Optional);
+		registerInput(_hammingDistanceLowLevel, "hamming distance low level",pipeline::Optional);
 		registerOutput(_painter, "painter");
 
 		_painter.registerSlot(_sizeChanged);
@@ -54,9 +55,10 @@ private:
 				<< "splits: " << _tedErrors->getNumSplits() << ", "
 				<< "merges: " << _tedErrors->getNumMerges() << std::endl;
 
-		if(_hammingDistance.isSet())
+		if(_hammingDistance.isSet()){
 			ss << "Hamming Distance: " << *_hammingDistance << std::endl;
-
+			ss << "Hamming Distance (low-level): " << *_hammingDistanceLowLevel << std::endl;
+		}
 
 		_painter->setText(ss.str());
 
@@ -67,6 +69,7 @@ private:
 	pipeline::Input<double>            _variationOfInformation;
 	pipeline::Input<Errors>		   _tedErrors;
 	pipeline::Input<unsigned int>		_hammingDistance;
+	pipeline::Input<unsigned int>		_hammingDistanceLowLevel;
 	pipeline::Output<gui::TextPainter> _painter;
 
 	signals::Slot<const gui::SizeChanged> _sizeChanged;

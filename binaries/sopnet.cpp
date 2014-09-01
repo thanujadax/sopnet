@@ -599,6 +599,7 @@ int main(int optionc, char** optionv) {
 				boost::shared_ptr<HammingDistanceCalculator> hammingDistanceCalculator = boost::make_shared<HammingDistanceCalculator>();
 				hammingDistanceCalculator->setInput("gold standard solution", sopnet->getOutput("gold standard solution vector"));
 				hammingDistanceCalculator->setInput("solution", sopnet->getOutput("solution vector"));
+				hammingDistanceCalculator->setInput("segments", sopnet->getOutput("segments"));
 
 				boost::shared_ptr<ErrorsView> errorsView = boost::make_shared<ErrorsView>();
 				boost::shared_ptr<NamedView>  namedView  = boost::make_shared<NamedView>("Errors:");
@@ -611,6 +612,7 @@ int main(int optionc, char** optionv) {
 
 				errorsView->setInput("slice errors", resultEvaluator->getOutput("slice errors"));
 				errorsView->setInput("hamming distance", hammingDistanceCalculator->getOutput("hamming distance"));
+				errorsView->setInput("hamming distance low level", hammingDistanceCalculator->getOutput("hamming distance low level"));
 				errorsView->setInput("variation of information", variationOfInformation->getOutput());
 				errorsView->setInput("tolerant edit distance errors", tolerantEditDistance->getOutput("errors"));
 				namedView->setInput(errorsView->getOutput());
