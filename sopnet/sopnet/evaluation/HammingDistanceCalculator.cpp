@@ -15,6 +15,7 @@ HammingDistanceCalculator::HammingDistanceCalculator() :
 
 	registerInput(_goldStandard, "gold standard solution");
 	registerInput(_result, "solution");
+	registerInput(_allSegments, "segments");
 
 	registerOutput(_hammingDistance, "hamming distance");
 	registerOutput(_hammingDistanceLowLevel, "hamming distance low level");
@@ -57,7 +58,7 @@ void
 HammingDistanceCalculator::calculateHammingDistanceLowLevel(){
 	std::vector<double> goldStandardVector = _goldStandard->getVector();
 	std::vector<double> resultVector = _result->getVector();
-	unsigned int numLowLevelSegments = _allSegments->getSegments.size();
+	unsigned int numLowLevelSegments = _allSegments->getSegments().size();
 
 	unsigned int counter = 0;
 
