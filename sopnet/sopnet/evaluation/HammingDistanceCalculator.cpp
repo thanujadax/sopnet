@@ -11,7 +11,8 @@
 logger::LogChannel hammingdistancecalculatorlog("hammingdistancecalculatorlog", "[HammingDistanceCalculator] ");
 
 HammingDistanceCalculator::HammingDistanceCalculator() :
-		_hammingDistance(new unsigned int(0)) {
+		_hammingDistance(new unsigned int(0)),
+		_hammingDistanceLowLevel(new unsigned int(0)){
 
 	registerInput(_goldStandard, "gold standard solution");
 	registerInput(_result, "solution");
