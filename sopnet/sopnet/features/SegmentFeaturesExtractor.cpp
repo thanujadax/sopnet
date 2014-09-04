@@ -25,6 +25,7 @@ SegmentFeaturesExtractor::SegmentFeaturesExtractor() :
 	_featuresAssembler->addInput(_histogramFeatureExtractor->getOutput());
 	_featuresAssembler->addInput(_typeFeatureExtractor->getOutput());
 	_featuresAssembler->addInput(_segmentPairFeatureExtractor->getOutput());
+
 }
 
 void
@@ -37,6 +38,7 @@ SegmentFeaturesExtractor::onInputSet(const pipeline::InputSetBase&) {
 		_histogramFeatureExtractor->setInput("raw sections", _rawSections.getAssignedOutput());
 		_typeFeatureExtractor->setInput("segments", _segments.getAssignedOutput());
 		_segmentPairFeatureExtractor->setInput("segments", _segments.getAssignedOutput());
+
 	}
 }
 

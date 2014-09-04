@@ -150,6 +150,7 @@ util::ProgramOption optionGridSearch(
 		_description_text = "Preform a grid search.");
 
 util::ProgramOption optionDumpSegmentPairDetails(
+		_module					= "sopnet",
 		util::_long_name        = "segmentPairDetailsDump",
 		util::_description_text = "Write segment pair details (constraints, component segments, features).");
 
