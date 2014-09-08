@@ -14,6 +14,7 @@
 #include <inference/LinearConstraints.h>
 #include <sopnet/segments/Segments.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include <sopnet/segments/ContinuationSegment.h>
 
 /*
@@ -43,6 +44,11 @@ private:
 			boost::shared_ptr<Slice> midSlice,
 			boost::shared_ptr<Slice> targetSlice);
 
+	void addNextSegmentPairEnd(
+			Direction direction,
+			boost::shared_ptr<ContinuationSegment> continuationSegment,
+			boost::shared_ptr<EndSegment> endSegment);
+
 	void assembleLinearConstraints();
 	void assembleLinearConstraint(boost::shared_ptr<SegmentPair> segmentPair,
 			double coefSegmentPair, double coefSegment1, double coefSegment2, Relation relation, double value);
@@ -56,8 +62,14 @@ private:
     // a list of synapse segments for each pair of frames
     pipeline::Inputs<Segments>         _synapseSegments;
 
-    // all segments in the problem
+    // all segment pairs in the problem
     pipeline::Output<Segments>          _segmentPairs;
+
+    // all segment pairs in the problem
+    pipeline::Output<Segments>          _segmentPairs;
+
+    // all segment pair ends in the problem
+    pipeline::Output<Segments>          _segmentPairEnds;
 
 	// list of all segment pair linear constraints
 	pipeline::Output<LinearConstraints> _linearConstraints;

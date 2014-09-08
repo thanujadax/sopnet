@@ -20,6 +20,7 @@ SegmentPairExtractor::SegmentPairExtractor() :
     registerInputs(_synapseSegments, "synapse segments");
 
 	registerOutput(_segmentPairs, "segment pairs");
+	registerOutput(_segmentPairEnds, "segment pair ends");
 	registerOutput(_linearConstraints,"segment pair linear constraints");
 
 }
@@ -77,7 +78,8 @@ SegmentPairExtractor::extractSegmentPairs(boost::shared_ptr<ContinuationSegment>
 	// for this segment, extract all possible segment pairs that continue from its target slice
 
 	// get interSectionInterval
-	unsigned int nextInterSectionInterval = segment->getInterSectionInterval() + 1;
+	unsigned int thisInterSectionInterval = segment->getInterSectionInterval();
+	unsigned int nextInterSectionInterval = thisInterSectionInterval +1;
 
 	// get all segments in the next interSectionInterval, continuing from this segment
 	std::vector<boost::shared_ptr<ContinuationSegment> > nextIntervalContinuationSegments = _allSegments->getContinuations(nextInterSectionInterval);
@@ -122,8 +124,25 @@ SegmentPairExtractor::extractSegmentPairs(boost::shared_ptr<ContinuationSegment>
 			}
 
 		}
-
 	}
+	// get all end segments in the next interSectionInterval, continuing from this segment
+	std::vector<boost::shared_ptr<EndSegment> > nextIntervalEndSegments
+				= _allSegments->getEnds(nextInterSectionInterval);
+	foreach(boost::shared_ptr<endSegment> nextSegment, nextIntervalEndSegments){
+		addNextSegmentPairEnd(Right,segment,nextSegment);
+	}
+
+	if(thisInterSectionInterval>0){
+		unsigned int prevInterSectionInterval = thisInterSectionInterval - 1;
+		// get all end segments in the prev interSectionInterval, continuing from this segment
+		std::vector<boost::shared_ptr<EndSegment> > prevIntervalEndSegments
+					= _allSegments->getEnds(prevInterSectionInterval);
+
+		foreach(boost::shared_ptr<endSegment> prevSegment, prevIntervalEndSegments){
+			addNextSegmentPairEnd(Left,segment,prevSegment);
+		}
+	}
+
 }
 
 void
@@ -145,6 +164,21 @@ SegmentPairExtractor::addNextSegmentPair(
 			targetSlice);
 
 	_segmentPairs->add(segmentPair);
+}
+
+void
+SegmentPairExtractor::addNextSegmentPairEnd(
+		Direction direction,
+		boost::shared_ptr<ContinuationSegment> continuationSegment,
+		boost::shared_ptr<ContinuationSegment> endSegment){
+
+	boost::shared_ptr<SegmentPairEnd> segmentPairEnd = boost::make_shared<SegmentPairEnd>(
+			Segment::getNextSegmentId(),
+			direction ,
+			continuationSegment,
+			endSegment);
+
+	_segmentPairEnds->add(segmentPairEnd);
 }
 
 void
