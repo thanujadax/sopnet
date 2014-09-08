@@ -18,6 +18,8 @@ SegmentPairExtractor::SegmentPairExtractor() :
     registerInputs(_neuronSegments, "neuron segments");
     registerInputs(_mitochondriaSegments, "mitochondria segments");
     registerInputs(_synapseSegments, "synapse segments");
+    registerInput(_withSegmentPairs, "with segment pairs");
+    registerInput(_withSegmentPairEnds, "with segment pair ends");
 
 	registerOutput(_segmentPairs, "segment pairs");
 	registerOutput(_segmentPairEnds, "segment pair ends");
@@ -66,15 +68,19 @@ SegmentPairExtractor::collectSegments() {
 void
 SegmentPairExtractor::extractSegmentPairsAll(){
 
-	foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations() ) {
-		extractSegmentPairs(segment);
-		}
-	LOG_DEBUG(segmentpairextractorlog) << "collected " << _segmentPairs->size() << " segmentPairs" << std::endl;
+	if(*_withSegmentPairs){
+		foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations() ) {
+			extractSegmentPairs(segment);
+			}
+		LOG_DEBUG(segmentpairextractorlog) << "collected " << _segmentPairs->size() << " segmentPairs" << std::endl;
+	}
 
-	foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations() ) {
-		extractSegmentPairEnds(segment);
-		}
-	LOG_DEBUG(segmentpairextractorlog) << "collected " << _segmentPairEnds->size() << " segmentPairEnds" << std::endl;
+	if(*_withSegmentPairEnds){
+		foreach (boost::shared_ptr<ContinuationSegment> segment, _allSegments->getContinuations() ) {
+			extractSegmentPairEnds(segment);
+			}
+		LOG_DEBUG(segmentpairextractorlog) << "collected " << _segmentPairEnds->size() << " segmentPairEnds" << std::endl;
+	}
 }
 
 void
@@ -212,23 +218,43 @@ SegmentPairExtractor::addNextSegmentPairEnd(
 
 void
 SegmentPairExtractor::assembleLinearConstraints(){
-	LOG_DEBUG(segmentpairextractorlog) << "assembling linear constraints..." << std::endl;
 
-	_linearConstraints->clear();
+	if(*_withSegmentPairs){
+		LOG_DEBUG(segmentpairextractorlog) << "assembling linear constraints for segment pairs..." << std::endl;
 
-	/* For each segment pair p_ij consisting of segments s_i and s_j the following 2 constraints are added
-	 * 1). p_ij - s_i -s_j >= -1
-	 * 2). -2*p_ij + s_i + s_j >= 0
-	 */
+		_linearConstraints->clear();
+
+		/* For each segment pair p_ij consisting of segments s_i and s_j the following 2 constraints are added
+		 * 1). p_ij - s_i -s_j >= -1
+		 * 2). -2*p_ij + s_i + s_j >= 0
+		 */
 
 
-	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segmentPairs->getSegmentPairs()){
+		foreach (boost::shared_ptr<SegmentPair> segmentPair, _segmentPairs->getSegmentPairs()){
 
-		// constraint 1
-		assembleLinearConstraint(segmentPair,1.0,-1.0,-1.0,GreaterEqual,-1.0);
-		// constraint 2
-		assembleLinearConstraint(segmentPair,-2.0,1.0,1.0,GreaterEqual,0.0);
+			// constraint 1
+			assembleLinearConstraint(segmentPair,1.0,-1.0,-1.0,GreaterEqual,-1.0);
+			// constraint 2
+			assembleLinearConstraint(segmentPair,-2.0,1.0,1.0,GreaterEqual,0.0);
 
+		}
+	}
+
+	if(*_withSegmentPairEnds){
+		LOG_DEBUG(segmentpairextractorlog) << "assembling linear constraints for segment pair ends..." << std::endl;
+		/* For each segment pair end p_ij consisting of segments s_i and s_j the following 2 constraints are added
+		 * 1). p_ij - s_i -s_j >= -1
+		 * 2). -2*p_ij + s_i + s_j >= 0
+		 */
+
+		foreach (boost::shared_ptr<SegmentPairEnd> segmentPairEnd, _segmentPairEnds->getSegmentPairEnds()){
+
+			// constraint 1
+			assembleLinearConstraint(segmentPairEnd,1.0,-1.0,-1.0,GreaterEqual,-1.0);
+			// constraint 2
+			assembleLinearConstraint(segmentPairEnd,-2.0,1.0,1.0,GreaterEqual,0.0);
+
+		}
 	}
 }
 
@@ -246,6 +272,28 @@ SegmentPairExtractor::assembleLinearConstraint(boost::shared_ptr<SegmentPair> se
 	constraint.setCoefficient(segmentPairId,coefSegmentPair);
 	constraint.setCoefficient(segmentId1,coefSegment1);
 	constraint.setCoefficient(segmentId2,coefSegment2);
+
+	constraint.setValue(value);
+
+	constraint.setRelation(relation);
+
+	_linearConstraints->add(constraint);
+}
+
+void
+SegmentPairExtractor::assembleLinearConstraint(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,
+		double coefSegmentPairEnd, double coefContinuation, double coefEnd, Relation relation, double value){
+
+	LinearConstraint constraint;
+	unsigned int continuationSegmentId,endSegmentId,segmentPairEndId;
+
+	segmentPairEndId = segmentPairEnd->getId();
+	continuationSegmentId = segmentPairEnd->getContinuationSegment()->getId();
+	endSegmentId = segmentPairEnd->getEndSegment()->getId();
+
+	constraint.setCoefficient(segmentPairEndId,coefSegmentPairEnd);
+	constraint.setCoefficient(continuationSegmentId,coefContinuation);
+	constraint.setCoefficient(endSegmentId,coefEnd);
 
 	constraint.setValue(value);
 

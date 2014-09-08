@@ -52,8 +52,12 @@ private:
 			boost::shared_ptr<EndSegment> endSegment);
 
 	void assembleLinearConstraints();
+
 	void assembleLinearConstraint(boost::shared_ptr<SegmentPair> segmentPair,
 			double coefSegmentPair, double coefSegment1, double coefSegment2, Relation relation, double value);
+
+	void assembleLinearConstraint(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,
+			double coefSegmentPairEnd, double coefContinuation, double coefEnd, Relation relation, double value);
 
     // a list of neuron segments for each pair of frames
     pipeline::Inputs<Segments>         _neuronSegments;
@@ -63,6 +67,12 @@ private:
 
     // a list of synapse segments for each pair of frames
     pipeline::Inputs<Segments>         _synapseSegments;
+
+    // should segment pairs be extracted?
+    pipeline::Input<bool>			_withSegmentPairs;
+
+    // should segment pair ends be extracted?
+    pipeline::Input<bool>			_withSegmentPairEnds;
 
     // all segment pairs in the problem
     pipeline::Output<Segments>          _segmentPairs;

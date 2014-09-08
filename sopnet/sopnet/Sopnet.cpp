@@ -66,10 +66,15 @@ util::ProgramOption optionDecomposeProblem(
 		util::_description_text = "Decompose the problem into overlapping subproblems and solve them using SCALAR.",
 		util::_default_value    = false);
 
-util::ProgramOption optionUseSegmentPairs(
+util::ProgramOption optionWithSegmentPairs(
 		util::_module           = "sopnet.segments",
-		util::_long_name        = "useSegmentPairs",
+		util::_long_name        = "withSegmentPairs",
 		util::_description_text = "Use higher-level variables Segment Pairs and their features for finding the optimal solution.");
+
+util::ProgramOption optionWithSegmentPairEnds(
+		util::_module           = "sopnet.segments",
+		util::_long_name        = "withSegmentPairEnds",
+		util::_description_text = "Use higher-level variables Segment Pair Ends and their features for finding the optimal solution.");
 
 
 Sopnet::Sopnet(
@@ -93,7 +98,9 @@ Sopnet::Sopnet(
 	_mitWriter(boost::make_shared<MinimalImpactTEDWriter>()),
 	_projectDirectory(projectDirectory),
 	_problemWriter(problemWriter),
-	_pipelineCreated(false) {
+	_pipelineCreated(false),
+	_withSegmentPairs(boost::make_shared<bool>()),
+	_withSegmentPairEnds(boost::make_shared<bool>()){
 
 	// tell the outside world what we need
 	registerInput(_rawSections, "raw sections");
@@ -122,6 +129,17 @@ Sopnet::Sopnet(
 	registerOutput(_segmentRfTrainer->getOutput("random forest"), "random forest");
 	registerOutput(_segmentFeaturesExtractor->getOutput("all features"), "all features");
 	registerOutput(_linearSolver->getOutput("solution"), "solution vector");
+
+	if(optionWithSegmentPairs)
+		*_withSegmentPairs = true;
+	else
+		*_withSegmentPairs = false;
+
+	if(optionWithSegmentPairEnds)
+		*_withSegmentPairEnds = true;
+	else
+		*_withSegmentPairEnds = false;
+
 }
 
 void
@@ -156,7 +174,7 @@ Sopnet::createPipeline() {
 		createStructuredProblemPipeline();
 		createMinimalImpactTEDPipeline();
 	}
-	if(optionUseSegmentPairs)
+	if(optionWithSegmentPairs || optionWithSegmentPairEnds)
 		createSegmentPairDumpPipeline();
 	_pipelineCreated = true;
 }
@@ -174,11 +192,18 @@ Sopnet::createBasicPipeline() {
 	_problemAssembler->clearInputs("synapse segments");
 	_problemAssembler->clearInputs("synapse linear constraints");
 
-	if(optionUseSegmentPairs){
+	if(optionWithSegmentPairs || optionWithSegmentPairEnds){
 		_segmentPairExtractor->clearInputs("neuron segments");
 		_segmentPairExtractor->clearInputs("mitochondria segments");
 		_segmentPairExtractor->clearInputs("synapse segments");
+
+		_segmentPairExtractor->setInput("with segment pairs", _withSegmentPairs);
+		_segmentPairExtractor->setInput("with segment pair ends", _withSegmentPairEnds);
+
+		_segmentPairConstraintGenerator->setInput("with segment pairs", _withSegmentPairs);
+		_segmentPairConstraintGenerator->setInput("with segment pair ends", _withSegmentPairEnds);
 	}
+
 
 
 	bool finishLastSection = !_problemWriter;
@@ -215,7 +240,7 @@ Sopnet::createBasicPipeline() {
 		_problemAssembler->addInput("neuron segments", _neuronSegmentExtractorPipeline->getSegments(i));
 		_problemAssembler->addInput("neuron linear constraints", _neuronSegmentExtractorPipeline->getConstraints(i));
 
-		if(optionUseSegmentPairs)
+		if(optionWithSegmentPairs || optionWithSegmentPairEnds)
 			_segmentPairExtractor->addInput("neuron segments", _neuronSegmentExtractorPipeline->getSegments(i));
 
 		if (_mitochondriaSegmentExtractorPipeline) {
@@ -223,7 +248,7 @@ Sopnet::createBasicPipeline() {
 			_problemAssembler->addInput("mitochondria segments", _mitochondriaSegmentExtractorPipeline->getSegments(i));
 			_problemAssembler->addInput("mitochondria linear constraints", _mitochondriaSegmentExtractorPipeline->getConstraints(i));
 
-			if(optionUseSegmentPairs)
+			if(optionWithSegmentPairs || optionWithSegmentPairEnds)
 				_segmentPairExtractor->addInput("mitochondria segments", _mitochondriaSegmentExtractorPipeline->getSegments(i));
 
 		}
@@ -233,18 +258,28 @@ Sopnet::createBasicPipeline() {
 			_problemAssembler->addInput("synapse segments", _synapseSegmentExtractorPipeline->getSegments(i));
 			_problemAssembler->addInput("synapse linear constraints", _synapseSegmentExtractorPipeline->getConstraints(i));
 
-			if(optionUseSegmentPairs)
+			if(optionWithSegmentPairs || optionWithSegmentPairEnds)
 				_segmentPairExtractor->addInput("synapse segments", _synapseSegmentExtractorPipeline->getSegments(i));
 		}
 	}
 
-	if(optionUseSegmentPairs){
+	if(optionWithSegmentPairs){
 		// segment pair linear constraint generator
 		_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 
 		// add segment pairs from segmentPairExtractor, to problemAssembler
 		_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 		//_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
+		_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
+	}
+
+	if(optionWithSegmentPairEnds){
+		// linear constraint generator for segment pair ends
+		_segmentPairConstraintGenerator->setInput("segment pair ends", _segmentPairExtractor->getOutput("segment pair ends"));
+
+		// add segment pair ends from segmentPairExtractor, to problemAssembler
+		_problemAssembler->setInput("segment pair ends", _segmentPairExtractor->getOutput("segment pair ends"));
+
 		_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
 	}
 

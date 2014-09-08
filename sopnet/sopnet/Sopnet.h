@@ -200,6 +200,9 @@ private:
 
 	bool _pipelineCreated;
 
+	pipeline::Output<bool> _withSegmentPairs;
+	pipeline::Output<bool> _withSegmentPairEnds;
+
 };
 
 #endif // CELLTRACKER_CELLTRACKER_H__

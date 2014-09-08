@@ -24,6 +24,8 @@ private:
 
 	void collectSegmentPairs();
 
+	void collectSegmentPairEnds();
+
 	void addExplanationConstraints();
 
 	void addConsistencyConstraints();
@@ -32,6 +34,7 @@ private:
 
 	void addSynapseConstraints();
 
+	// adds constraints for both segment pairs and segment pair ends
 	void addSegmentPairConstraints();
 
 	void mapConstraints(boost::shared_ptr<LinearConstraints> linearConstraints);
@@ -43,6 +46,8 @@ private:
 	void setCoefficient(const BranchSegment& branch);
 
 	void setCoefficient(const SegmentPair& segmentPair);
+
+	void setCoefficient(const SegmentPairEnd& segmentPairEnd);
 
 	void extractSliceIdsMap();
 
@@ -93,6 +98,9 @@ private:
 
 	// all segment pairs in the problem
 	pipeline::Input<Segments>          _segmentPairs;
+
+	// all segment pair ends in the problem
+	pipeline::Input<Segments>          _segmentPairEnds;
 
 	// segment pair linear constraints for the entire set of segment pairs in the problem
 	pipeline::Input<LinearConstraints> _segmentPairLinearConstraints;
@@ -148,6 +156,9 @@ private:
 
 	// number of segment pairs
 	unsigned int _numSegmentPairs;
+
+	// number of segment pair ends
+	unsigned int _numSegmentPairEnds;
 
 	// functor to compute the overlap between slices
 	Overlap _overlap;

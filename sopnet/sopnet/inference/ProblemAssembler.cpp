@@ -4,6 +4,7 @@
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include "ProblemAssembler.h"
 
 util::ProgramOption optionMaxMitochondriaNeuronDistance(
@@ -48,6 +49,7 @@ ProblemAssembler::ProblemAssembler() :
 	registerInputs(_synapseSegments, "synapse segments");
 	registerInputs(_synapseLinearConstraints, "synapse linear constraints");
 	registerInput(_segmentPairs, "segment pairs", pipeline::Optional);
+	registerInput(_segmentPairEnds, "segment pair ends", pipeline::Optional);
 	registerInput(_segmentPairLinearConstraints, "segment pair linear constraints", pipeline::Optional);
 
 	registerOutput(_allSegments, "segments");
@@ -67,6 +69,9 @@ ProblemAssembler::updateOutputs() {
 	if(_segmentPairs.isSet())
 		collectSegmentPairs();
 
+	if(_segmentPairEnds.isSet())
+		collectSegmentPairEnds();
+
 	// make sure slices are used from both sides
 	addExplanationConstraints();
 
@@ -81,7 +86,7 @@ ProblemAssembler::updateOutputs() {
 
 
 	// make sure each segmentPair is bound to the corresponding pair of segments
-	if(_segmentPairs.isSet())
+	if(_segmentPairs.isSet() || _segmentPairEnds.isSet())
 		addSegmentPairConstraints();
 }
 
@@ -130,6 +135,18 @@ ProblemAssembler::collectSegmentPairs(){
 	_numSegmentPairs = _segmentPairs->size();
 
 	LOG_DEBUG(problemassemblerlog) << "collected " << _numSegmentPairs << " segment pairs" << std::endl;
+
+}
+
+void
+ProblemAssembler::collectSegmentPairEnds(){
+
+	LOG_DEBUG(problemassemblerlog) << "collecting segment pair ends..." << std::endl;
+
+	_allSegments->addAll(_segmentPairEnds);
+	_numSegmentPairEnds = _segmentPairEnds->size();
+
+	LOG_DEBUG(problemassemblerlog) << "collected " << _numSegmentPairEnds << " segment pair ends" << std::endl;
 
 }
 
@@ -324,8 +341,12 @@ void
 ProblemAssembler::addSegmentPairConstraints() {
 	LOG_DEBUG(problemassemblerlog) << "adding segment-pair constraints..." << std::endl;
 
-	// set coefficients
+	// set coefficients segment pairs
 	foreach (boost::shared_ptr<SegmentPair> segment, _allSegments->getSegmentPairs())
+		setCoefficient(*segment);
+
+	// set coefficients segment pair ends
+	foreach (boost::shared_ptr<SegmentPairEnd> segment, _allSegments->getSegmentPairEnds())
 		setCoefficient(*segment);
 
 	 mapConstraints(_segmentPairLinearConstraints);
@@ -428,6 +449,19 @@ ProblemAssembler::setCoefficient(const SegmentPair& segmentPair) {
 	 * reconstruct the result.
 	 */
 	_problemConfiguration->setVariable(segmentPair, _numSegments);
+
+	_numSegments++;
+}
+
+void
+ProblemAssembler::setCoefficient(const SegmentPairEnd& segmentPairEnd) {
+
+	/* We assigned a variable number (_numSegments) to every
+	 * segment we found. Remember this mapping -- we will need it to
+	 * transform the linear constraints on the segments and to
+	 * reconstruct the result.
+	 */
+	_problemConfiguration->setVariable(segmentPairEnd, _numSegments);
 
 	_numSegments++;
 }
