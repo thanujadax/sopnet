@@ -6,6 +6,7 @@
 #include <pipeline/all.h>
 #include <sopnet/inference/PriorCostFunctionParameters.h>
 #include <sopnet/inference/SegmentationCostFunctionParameters.h>
+#include <inference/Solution.h>
 #include <sopnet/segments/SegmentExtractionPipeline.h>
 #include <sopnet/segments/SegmentPairExtractor.h>
 #include <sopnet/segments/SegmentPairConstraintGenerator.h>
@@ -198,6 +199,7 @@ private:
 	boost::shared_ptr<ProcessNode> _problemWriter;
 
 	bool _pipelineCreated;
+
 };
 
 #endif // CELLTRACKER_CELLTRACKER_H__

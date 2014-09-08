@@ -17,7 +17,9 @@ ResultEvaluator::ResultEvaluator(double minOverlap) :
 
 	registerInput(_result, "result");
 	registerInput(_groundTruth, "ground truth");
+
 	registerOutput(_sliceErrors, "slice errors");
+
 }
 
 void
@@ -176,6 +178,7 @@ ResultEvaluator::updateOutputs() {
 			<< minSliceErrors.numFalseNegatives() << " "
 			<< minSliceErrors.numFalseSplits() << " "
 			<< minSliceErrors.numFalseMerges() << std::endl;
+
 }
 
 ResultEvaluator::Mappings
@@ -579,4 +582,3 @@ ResultEvaluator::getInterSliceErrors(
 
 	return interSliceErrors;
 }
-

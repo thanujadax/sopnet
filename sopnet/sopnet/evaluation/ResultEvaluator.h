@@ -69,6 +69,7 @@ private:
 
 	pipeline::Input<Segments> _result;
 	pipeline::Input<Segments> _groundTruth;
+	pipeline::Input<Segments> _goldStandard;
 
 	pipeline::Output<SliceErrors> _sliceErrors;
 

@@ -47,8 +47,8 @@ ProblemAssembler::ProblemAssembler() :
 	registerInputs(_mitochondriaLinearConstraints, "mitochondria linear constraints");
 	registerInputs(_synapseSegments, "synapse segments");
 	registerInputs(_synapseLinearConstraints, "synapse linear constraints");
-	registerInput(_segmentPairs, "segment pairs");
-	registerInput(_segmentPairLinearConstraints, "segment pair linear constraints");
+	registerInput(_segmentPairs, "segment pairs", pipeline::Optional);
+	registerInput(_segmentPairLinearConstraints, "segment pair linear constraints", pipeline::Optional);
 
 	registerOutput(_allSegments, "segments");
 	registerOutput(_allNeuronSegments, "neuron segments");
@@ -64,7 +64,8 @@ ProblemAssembler::updateOutputs() {
 
 	collectSegments();
 
-	collectSegmentPairs();
+	if(_segmentPairs.isSet())
+		collectSegmentPairs();
 
 	// make sure slices are used from both sides
 	addExplanationConstraints();
@@ -78,8 +79,10 @@ ProblemAssembler::updateOutputs() {
 	// make sure synapses are enclosed by a single neuron
 	addSynapseConstraints();
 
+
 	// make sure each segmentPair is bound to the corresponding pair of segments
-	addSegmentPairConstraints();
+	if(_segmentPairs.isSet())
+		addSegmentPairConstraints();
 }
 
 
@@ -127,7 +130,6 @@ ProblemAssembler::collectSegmentPairs(){
 	_numSegmentPairs = _segmentPairs->size();
 
 	LOG_DEBUG(problemassemblerlog) << "collected " << _numSegmentPairs << " segment pairs" << std::endl;
-
 
 }
 

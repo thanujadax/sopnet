@@ -9,13 +9,14 @@
 
 logger::LogChannel goldstandardextractorlog("goldstandardextractorlog", "[GoldStandardExtractor] ");
 
-GoldStandardExtractor::GoldStandardExtractor() {
+GoldStandardExtractor::GoldStandardExtractor(){
 
 	registerInput(_groundTruth, "ground truth");
 	registerInput(_allSegments, "all segments");
 	registerInput(_allLinearConstraints, "all linear constraints");
 
 	registerOutput(_reconstructor->getOutput("reconstruction"), "gold standard");
+	registerOutput(_linearSolver->getOutput("solution"), "gold standard solution");
 	registerOutput(_reconstructor->getOutput("discarded segments"), "negative samples");
 }
 
@@ -26,18 +27,17 @@ GoldStandardExtractor::updateOutputs() {
 
 	pipeline::Process<GoldStandardCostFunction> goldStandardCostFunction;
 	pipeline::Process<ObjectiveGenerator>       objectiveGenerator;
-	pipeline::Process<LinearSolver>             linearSolver;
 
 	goldStandardCostFunction->setInput("ground truth", _groundTruth);
 
 	objectiveGenerator->setInput("segments", _allSegments);
 	objectiveGenerator->addInput("cost functions", goldStandardCostFunction->getOutput());
 
-	linearSolver->setInput("objective", objectiveGenerator->getOutput());
-	linearSolver->setInput("linear constraints", _allLinearConstraints);
-	linearSolver->setInput("parameters", boost::make_shared<LinearSolverParameters>(Binary));
+	_linearSolver->setInput("objective", objectiveGenerator->getOutput());
+	_linearSolver->setInput("linear constraints", _allLinearConstraints);
+	_linearSolver->setInput("parameters", boost::make_shared<LinearSolverParameters>(Binary));
 
-	_reconstructor->setInput("solution", linearSolver->getOutput("solution"));
+	_reconstructor->setInput("solution", _linearSolver->getOutput("solution"));
 	_reconstructor->setInput("segments", _allSegments);
 }
 
