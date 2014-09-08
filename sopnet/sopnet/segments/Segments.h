@@ -9,6 +9,7 @@
 #include "ContinuationSegment.h"
 #include "BranchSegment.h"
 #include "SegmentPair.h"
+#include "SegmentPairEnd.h"
 
 /**
  * An adaptor class to use std::vector<boost::shared_ptr<SegmentType> > in a
@@ -76,6 +77,7 @@ class Segments : public pipeline::Data {
 	typedef SegmentVectorAdaptor<ContinuationSegment> ContinuationSegmentVectorAdaptor;
 	typedef SegmentVectorAdaptor<BranchSegment>       BranchSegmentVectorAdaptor;
 	typedef SegmentVectorAdaptor<SegmentPair>         SegmentPairVectorAdaptor;
+	typedef SegmentVectorAdaptor<SegmentPairEnd>      SegmentPairEndVectorAdaptor;
 
 	// nanoflann kd-tree types for each segment type
 	typedef nanoflann::KDTreeSingleIndexAdaptor<
@@ -98,6 +100,12 @@ class Segments : public pipeline::Data {
 			SegmentPairVectorAdaptor,
 			2>
 			SegmentPairKdTree;
+	typedef nanoflann::KDTreeSingleIndexAdaptor<
+			nanoflann::L2_Simple_Adaptor<double, SegmentPairEndVectorAdaptor>,
+			SegmentPairEndVectorAdaptor,
+			2>
+			SegmentPairEndKdTree;
+
 
 public:
 
@@ -124,9 +132,14 @@ public:
 	void add(boost::shared_ptr<BranchSegment> branch);
 
 	/**
-	 * Add a single branch segment to this set of segments.
+	 * Add a single segmentPair to this set of segments.
 	 */
 	void add(boost::shared_ptr<SegmentPair> segmentPair);
+
+	/**
+	 * Add a single segmentPairEnd to this set of segments
+	 */
+	void add(boost::shared_ptr<SegmentPairEnd> segmentPairEnd);
 
 	/**
 	 * Add a set of segments to this set of segments.
@@ -164,6 +177,11 @@ public:
 	std::vector<boost::shared_ptr<SegmentPair> > getSegmentPairs() const;
 
 	/**
+	 * Get all segment pair ends.
+	 */
+	std::vector<boost::shared_ptr<SegmentPairEnd> > getSegmentPairEnds() const;
+
+	/**
 	 * Get all segments.
 	 */
 	std::vector<boost::shared_ptr<Segment> > getSegments() const;
@@ -174,9 +192,14 @@ public:
 	std::vector<boost::shared_ptr<Segment> > getSegmentsComplex() const;
 
 	/**
-	 * Get all segments in the given inter-section interval.
+	 * Get all (low-level) segments in the given inter-section interval.
 	 */
 	std::vector<boost::shared_ptr<Segment> > getSegments(unsigned int interval);
+
+	/**
+	 * Get all (including complex) segments in the given inter-section interval.
+	 */
+	std::vector<boost::shared_ptr<Segment> > getSegmentsComplex(unsigned int interval);
 
 	/**
 	 * Get all end segments in the given inter-section interval.
@@ -197,6 +220,11 @@ public:
 	 * Get all segment pairs in the given inter-section interval.
 	 */
 	std::vector<boost::shared_ptr<SegmentPair> >& getSegmentPairs(unsigned int interval);
+
+	/**
+	 * Get all segment pair ends in the given inter-section interval.
+	 */
+	std::vector<boost::shared_ptr<SegmentPairEnd> >& getSegmentPairEnds(unsigned int interval);
 
 	/**
 	 * Find all end segments in the given inter-section interval that are close
@@ -244,6 +272,18 @@ public:
 	 */
 	std::vector<boost::shared_ptr<SegmentPair> > findSegmentPairs(
 			boost::shared_ptr<SegmentPair> reference,
+			double                           distance);
+
+	/**
+	 * Find all segment pair ends in the given inter-section interval that are
+	 * close to another branch segment.
+	 *
+	 * @param reference A segment defining the center of the search region.
+	 * @param distance The maximally allowed distance of the segments to the
+	 *                 given segments.
+	 */
+	std::vector<boost::shared_ptr<SegmentPairEnd> > findSegmentPairEnds(
+			boost::shared_ptr<SegmentPairEnd> reference,
 			double                           distance);
 
 	/**
@@ -303,12 +343,27 @@ public:
 			double                     distance);
 
 	/**
+	 * Find all segment pair ends in the given inter-section interval that are
+	 * close to the given position.
+	 *
+	 * @param center The 2D center of the search.
+	 * @param interSectionInterval The inter-section interval to search in.
+	 * @param distance The maximally allowed distance of the segments to thestd::vector<boost::shared_ptr<Slice> >
+	 *                 given segments.
+	 */
+	std::vector<boost::shared_ptr<SegmentPairEnd> > findSegmentPairEnds(
+			const util::point<double>& center,
+			unsigned int               interSectionInterval,
+			double                     distance);
+
+	/**
 	 * Check whether the given segment is part of this set.
 	 */
 	bool contains(boost::shared_ptr<EndSegment>          end)          { return contains(getEnds(end->getInterSectionInterval()), end); }
 	bool contains(boost::shared_ptr<ContinuationSegment> continuation) { return contains(getContinuations(continuation->getInterSectionInterval()), continuation); }
 	bool contains(boost::shared_ptr<BranchSegment>       branch)       { return contains(getBranches(branch->getInterSectionInterval()), branch); }
 	bool contains(boost::shared_ptr<SegmentPair>         segmentPair)  { return contains(getSegmentPairs(segmentPair->getInterSectionInterval()), segmentPair); }
+	bool contains(boost::shared_ptr<SegmentPairEnd>      segmentPairEnd) { return contains(getSegmentPairEnds(segmentPairEnd->getInterSectionInterval()), segmentPairEnd); }
 
 	/**
 	 * Remove the given segment from this set.
@@ -317,11 +372,13 @@ public:
 	void remove(boost::shared_ptr<ContinuationSegment> continuation) { remove(getContinuations(continuation->getInterSectionInterval()), continuation); }
 	void remove(boost::shared_ptr<BranchSegment>       branch)       { remove(getBranches(branch->getInterSectionInterval()), branch); }
 	void remove(boost::shared_ptr<SegmentPair>         segmentPair)  { remove(getSegmentPairs(segmentPair->getInterSectionInterval()), segmentPair); }
+	void remove(boost::shared_ptr<SegmentPairEnd>      segmentPairEnd) { remove(getSegmentPairEnds(segmentPairEnd->getInterSectionInterval()), segmentPairEnd); }
 	void remove(boost::shared_ptr<Segment> segment) {
 		remove(getEnds(         segment->getInterSectionInterval()), segment);
 		remove(getContinuations(segment->getInterSectionInterval()), segment);
 		remove(getBranches(     segment->getInterSectionInterval()), segment);
 		remove(getSegmentPairs( segment->getInterSectionInterval()), segment);
+		remove(getSegmentPairEnds( segment->getInterSectionInterval()), segment);
 	}
 
 	/**
@@ -343,6 +400,7 @@ private:
 	static std::vector<boost::shared_ptr<ContinuationSegment> > EmptyContinuations;
 	static std::vector<boost::shared_ptr<BranchSegment> >       EmptyBranches;
 	static std::vector<boost::shared_ptr<SegmentPair> >         EmptySegmentPairs;
+	static std::vector<boost::shared_ptr<SegmentPairEnd> >      EmptySegmentPairEnds;
 
 	// resize to hold segments in the given number of inter-section intervals
 	void resize(int numInterSectionInterval);
@@ -452,24 +510,28 @@ private:
 	std::vector<std::vector<boost::shared_ptr<ContinuationSegment> > > _continuations;
 	std::vector<std::vector<boost::shared_ptr<BranchSegment> > >       _branches;
 	std::vector<std::vector<boost::shared_ptr<SegmentPair> > >         _segmentPairs;
+	std::vector<std::vector<boost::shared_ptr<SegmentPairEnd> > >      _segmentPairEnds;
 
 	// one nanoflann adaptor for each inter-section interval and segment type
 	std::vector<EndSegmentVectorAdaptor*>          _endAdaptors;
 	std::vector<ContinuationSegmentVectorAdaptor*> _continuationAdaptors;
 	std::vector<BranchSegmentVectorAdaptor*>       _branchAdaptors;
 	std::vector<SegmentPairVectorAdaptor*>         _segmentPairAdaptors;
+	std::vector<SegmentPairEndVectorAdaptor*>      _segmentPairEndAdaptors;
 
 	// one kd-tree for each inter-section interval and segment type
 	std::vector<EndSegmentKdTree*>          _endTrees;
 	std::vector<ContinuationSegmentKdTree*> _continuationTrees;
 	std::vector<BranchSegmentKdTree*>       _branchTrees;
 	std::vector<SegmentPairKdTree*>         _segmentPairTrees;
+	std::vector<SegmentPairEndKdTree*>      _segmentPairEndTrees;
 
 	// indicate that kd-trees have to be (re)build
 	std::vector<bool> _endTreeDirty;
 	std::vector<bool> _continuationTreeDirty;
 	std::vector<bool> _branchTreeDirty;
 	std::vector<bool> _segmentPairTreeDirty;
+	std::vector<bool> _segmentPairEndTreeDirty;
 };
 
 #endif // CELLTRACKER_TRACKLETS_H__

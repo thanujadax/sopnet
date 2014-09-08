@@ -18,7 +18,7 @@ public:
 
 	SegmentPairEnd(unsigned int id, Direction direction,
 			boost::shared_ptr<ContinuationSegment> continuationSegment,
-			boost::shared_ptr<ContinuationSegment> endSegment);
+			boost::shared_ptr<EndSegment> endSegment);
 
 	boost::shared_ptr<ContinuationSegment> getContinuationSegment() const;
 

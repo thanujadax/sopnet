@@ -36,6 +36,8 @@ private:
 
 	void extractSegmentPairs(boost::shared_ptr<ContinuationSegment> segment);
 
+	void extractSegmentPairEnds(boost::shared_ptr<ContinuationSegment> segment);
+
 	void addNextSegmentPair(
 			Direction direction,
 			boost::shared_ptr<ContinuationSegment> segment1,
@@ -61,9 +63,6 @@ private:
 
     // a list of synapse segments for each pair of frames
     pipeline::Inputs<Segments>         _synapseSegments;
-
-    // all segment pairs in the problem
-    pipeline::Output<Segments>          _segmentPairs;
 
     // all segment pairs in the problem
     pipeline::Output<Segments>          _segmentPairs;
