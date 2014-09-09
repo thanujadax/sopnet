@@ -34,7 +34,7 @@ ObjectiveGenerator::updateObjective() {
 	for (unsigned int i = 0; i < _costFunctions.size(); i++) {
 
 		costs_function_type& costFunction = *_costFunctions[i];
-		costFunction(_segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), _segments->getSegmentPairs(), allCosts);
+		costFunction(_segments->getEnds(), _segments->getContinuations(), _segments->getBranches(), _segments->getSegmentPairs(),  _segments->getSegmentPairEnds(), allCosts);
 	}
 
 	// end segments at the beginning and end of the stack should come for free
