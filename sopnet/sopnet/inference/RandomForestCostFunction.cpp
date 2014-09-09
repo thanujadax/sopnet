@@ -7,6 +7,7 @@
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include "RandomForestCostFunction.h"
 
 static logger::LogChannel randomforestcostfunctionlog("randomforestcostfunctionlog", "[RandomForestCostFunction] ");
@@ -23,7 +24,7 @@ util::ProgramOption optionUseOverlapOnly(
 		util::_description_text = "Instead of using the random forest prediction in the objective, use the number of overlapping pixels for each segment.");
 
 RandomForestCostFunction::RandomForestCostFunction() :
-	_costFunction(new costs_function_type(boost::bind(&RandomForestCostFunction::costs, this, _1, _2, _3, _4, _5))),
+	_costFunction(new costs_function_type(boost::bind(&RandomForestCostFunction::costs, this, _1, _2, _3, _4, _5, _6))),
 	_maxSegmentCosts(-std::log(optionMinSegmentProbability.as<double>())),
 	_useOverlapOnly(optionUseOverlapOnly),
 	_overlapFeature(-1) {
@@ -46,6 +47,7 @@ RandomForestCostFunction::costs(
 		const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 		const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
 		const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
+		const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairEnds,
 		std::vector<double>& segmentCosts) {
 
 	if (_useOverlapOnly && _overlapFeature == -1) {
