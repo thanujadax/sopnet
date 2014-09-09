@@ -102,7 +102,7 @@ private:
 	// all segment pair ends in the problem
 	pipeline::Input<Segments>          _segmentPairEnds;
 
-	// segment pair linear constraints for the entire set of segment pairs in the problem
+	// segment pair linear constraints for the entire set of segment pairs and segment pair ends in the problem
 	pipeline::Input<LinearConstraints> _segmentPairLinearConstraints;
 
 	// all segments in the problem
