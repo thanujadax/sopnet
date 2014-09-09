@@ -34,6 +34,9 @@ private:
 
 	void computeFeatures(const boost::shared_ptr<SegmentPairEnd> segmentPairEnd, std::vector<double>& features);
 
+	double orientationOfSegmentPairEnd(	const boost::shared_ptr<Slice> slice1,
+										   const boost::shared_ptr<Slice> slice2);
+
     pipeline::Input<Segments> _segments;
 
     pipeline::Output<Features> _features;

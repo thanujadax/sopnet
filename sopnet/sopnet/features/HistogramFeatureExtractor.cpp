@@ -4,6 +4,8 @@
 #include <sopnet/segments/EndSegment.h>
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
+#include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include "HistogramFeatureExtractor.h"
 
 HistogramFeatureExtractor::HistogramFeatureExtractor(unsigned int numBins) :
@@ -44,6 +46,9 @@ HistogramFeatureExtractor::updateOutputs() {
 		getFeatures(*segment, _features->get(segment->getId()));
 
 	foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
+			getFeatures(*segment, _features->get(segment->getId()));
+
+	foreach (boost::shared_ptr<SegmentPairEnd> segment, _segments->getSegmentPairEnds())
 			getFeatures(*segment, _features->get(segment->getId()));
 }
 
@@ -117,6 +122,12 @@ HistogramFeatureExtractor::getFeatures(const SegmentPair& segmentPair, std::vect
 			features[i] = Features::NoFeatureValue;
 }
 
+void
+HistogramFeatureExtractor::getFeatures(const SegmentPairEnd& segmentPairEnd, std::vector<double>& features) {
+	for (unsigned int i = 0; i < _numBins*4; i++)
+			features[i] = Features::NoFeatureValue;
+}
+
 std::vector<double>
 HistogramFeatureExtractor::computeHistogram(const Slice& slice) {
 
@@ -137,3 +148,5 @@ HistogramFeatureExtractor::computeHistogram(const Slice& slice) {
 
 	return histogram;
 }
+
+

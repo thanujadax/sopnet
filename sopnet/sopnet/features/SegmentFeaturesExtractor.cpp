@@ -3,6 +3,7 @@
 #include "HistogramFeatureExtractor.h"
 #include "TypeFeatureExtractor.h"
 #include "SegmentPairFeatureExtractor.h"
+#include "SegmentPairEndFeatureExtractor.h"
 
 logger::LogChannel segmentfeaturesextractorlog("segmentfeaturesextractorlog", "[SegmentFeaturesExtractor] ");
 
@@ -11,6 +12,7 @@ SegmentFeaturesExtractor::SegmentFeaturesExtractor() :
 	_histogramFeatureExtractor(boost::make_shared<HistogramFeatureExtractor>(10)),
 	_typeFeatureExtractor(boost::make_shared<TypeFeatureExtractor>()),
 	_segmentPairFeatureExtractor(boost::make_shared<SegmentPairFeatureExtractor>()),
+	_segmentPairEndFeatureExtractor(boost::make_shared<SegmentPairEndFeatureExtractor>()),
 	_featuresAssembler(boost::make_shared<FeaturesAssembler>()) {
 
 	registerInput(_segments, "segments");
@@ -25,6 +27,7 @@ SegmentFeaturesExtractor::SegmentFeaturesExtractor() :
 	_featuresAssembler->addInput(_histogramFeatureExtractor->getOutput());
 	_featuresAssembler->addInput(_typeFeatureExtractor->getOutput());
 	_featuresAssembler->addInput(_segmentPairFeatureExtractor->getOutput());
+	_featuresAssembler->addInput(_segmentPairEndFeatureExtractor->getOutput());
 
 }
 
@@ -38,6 +41,7 @@ SegmentFeaturesExtractor::onInputSet(const pipeline::InputSetBase&) {
 		_histogramFeatureExtractor->setInput("raw sections", _rawSections.getAssignedOutput());
 		_typeFeatureExtractor->setInput("segments", _segments.getAssignedOutput());
 		_segmentPairFeatureExtractor->setInput("segments", _segments.getAssignedOutput());
+		_segmentPairEndFeatureExtractor->setInput("segments", _segments.getAssignedOutput());
 
 	}
 }

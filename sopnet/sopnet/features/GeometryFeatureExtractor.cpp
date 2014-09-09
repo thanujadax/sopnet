@@ -9,6 +9,7 @@
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include "GeometryFeatureExtractor.h"
 
 logger::LogChannel geometryfeatureextractorlog("geometryfeatureextractorlog", "[GeometryFeatureExtractor] ");
@@ -74,6 +75,9 @@ GeometryFeatureExtractor::updateOutputs() {
 		getFeatures(*segment);
 
 	foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
+			getFeatures(*segment);
+
+	foreach (boost::shared_ptr<SegmentPairEnd> segment, _segments->getSegmentPairEnds())
 			getFeatures(*segment);
 
 	LOG_ALL(geometryfeatureextractorlog) << "found features: " << *_features << std::endl;
@@ -240,6 +244,21 @@ GeometryFeatureExtractor::computeFeatures(const BranchSegment& branch, std::vect
 
 void
 GeometryFeatureExtractor::computeFeatures(const SegmentPair& segmentPair, std::vector<double>& features) {
+
+	unsigned int numFeatures;
+
+	if (!_noSliceDistance)
+		numFeatures = 16;
+	 else
+		numFeatures = 12;
+
+	for (unsigned int i = 0; i < numFeatures; i++)
+				features[i] = Features::NoFeatureValue;
+
+}
+
+void
+GeometryFeatureExtractor::computeFeatures(const SegmentPairEnd& segmentPairEnd, std::vector<double>& features) {
 
 	unsigned int numFeatures;
 
