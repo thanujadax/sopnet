@@ -6,12 +6,13 @@
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include "GoldStandardCostFunction.h"
 
 static logger::LogChannel linearcostfunctionlog("linearcostfunctionlog", "[GoldStandardCostFunction] ");
 
 GoldStandardCostFunction::GoldStandardCostFunction() :
-	_costFunction(new costs_function_type(boost::bind(&GoldStandardCostFunction::costs, this, _1, _2, _3, _4, _5))),
+	_costFunction(new costs_function_type(boost::bind(&GoldStandardCostFunction::costs, this, _1, _2, _3, _4, _5, _6))),
 	_overlap(false, false) {
 
 	registerInput(_groundTruth, "ground truth");
@@ -27,6 +28,7 @@ GoldStandardCostFunction::costs(
 		const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 		const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
 		const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
+		const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairEnds,
 		std::vector<double>& segmentCosts) {
 
 	unsigned int i = 0;
@@ -58,6 +60,14 @@ GoldStandardCostFunction::costs(
 	foreach (boost::shared_ptr<SegmentPair> segmentPair, segmentPairs) {
 
 		double c = costs(*segmentPair);
+
+		segmentCosts[i] += c;
+		i++;
+	}
+
+	foreach (boost::shared_ptr<SegmentPairEnd> segmentPairEnd, segmentPairEnds) {
+
+		double c = costs(*segmentPairEnd);
 
 		segmentCosts[i] += c;
 		i++;

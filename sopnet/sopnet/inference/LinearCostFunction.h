@@ -11,6 +11,7 @@ class EndSegment;
 class ContinuationSegment;
 class BranchSegment;
 class SegmentPair;
+class SegmentPairEnd;
 
 class LinearCostFunction : public pipeline::SimpleProcessNode<> {
 
@@ -20,6 +21,7 @@ class LinearCostFunction : public pipeline::SimpleProcessNode<> {
 			 const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 			 const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
 			 const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
+			 const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairEnds,
 			 std::vector<double>& costs)>
 			costs_function_type;
 
@@ -37,6 +39,7 @@ private:
 			const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 			const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
 			const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
+			const std::vector<boost::shared_ptr<SegmentPairEnd> >&         segmentPairEnds,
 			std::vector<double>& costs);
 
 	double costs(const Segment& segment, const std::vector<double>& weights);

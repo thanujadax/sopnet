@@ -6,12 +6,13 @@
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include "LinearCostFunction.h"
 
 static logger::LogChannel linearcostfunctionlog("linearcostfunctionlog", "[LinearCostFunction] ");
 
 LinearCostFunction::LinearCostFunction() :
-	_costFunction(new costs_function_type(boost::bind(&LinearCostFunction::costs, this, _1, _2, _3, _4,_5))) {
+	_costFunction(new costs_function_type(boost::bind(&LinearCostFunction::costs, this, _1, _2, _3, _4,_5,_6))) {
 
 	registerInput(_features, "features");
 	registerInput(_parameters, "parameters");
@@ -43,9 +44,10 @@ LinearCostFunction::costs(
 		const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 		const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
 		const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
+		const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairEnds,
 		std::vector<double>& segmentCosts) {
 
-	segmentCosts.resize(ends.size() + continuations.size() + branches.size() + segmentPairs.size(), 0);
+	segmentCosts.resize(ends.size() + continuations.size() + branches.size() + segmentPairs.size() + segmentPairEnds.size() + , 0);
 
 	if (segmentCosts.size() == _cache.size()) {
 
@@ -55,7 +57,7 @@ LinearCostFunction::costs(
 		return;
 	}
 
-	_cache.resize(ends.size() + continuations.size() + branches.size() + segmentPairs.size() );
+	_cache.resize(ends.size() + continuations.size() + branches.size() + segmentPairs.size() + segmentPairEnds.size() );
 	LOG_DEBUG(linearcostfunctionlog) << "Total number of segment variables = " << _cache.size() << std::endl;
 
 	const std::vector<double> weights = _parameters->getWeights();
@@ -101,7 +103,17 @@ LinearCostFunction::costs(
 			_cache[i] = c;
 
 			i++;
-		}
+	}
+
+	foreach (boost::shared_ptr<SegmentPairEnd> segmentPairEnd, segmentPairEnds) {
+
+			double c = costs(*segmentPairEnd, weights);
+
+			segmentCosts[i] += c;
+			_cache[i] = c;
+
+			i++;
+	}
 }
 
 double
