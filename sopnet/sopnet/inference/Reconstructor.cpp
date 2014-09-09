@@ -45,6 +45,9 @@ Reconstructor::updateReconstruction() {
 	foreach (boost::shared_ptr<SegmentPair> segment, _segments->getSegmentPairs())
 			probe(segment);
 
+	foreach (boost::shared_ptr<SegmentPairEnd> segment, _segments->getSegmentPairEnds())
+			probe(segment);
+
 	LOG_ALL(reconstructorlog) << std::endl;
 
 }

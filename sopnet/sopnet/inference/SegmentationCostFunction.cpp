@@ -4,6 +4,7 @@
 #include <sopnet/segments/ContinuationSegment.h>
 #include <sopnet/segments/BranchSegment.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include <sopnet/slices/Slice.h>
 #include <util/ProgramOptions.h>
 
@@ -16,7 +17,7 @@ util::ProgramOption optionInvertMembraneMaps(
 		                          "(not inverting) is: bright pixel = hight membrane probability.");
 
 SegmentationCostFunction::SegmentationCostFunction() :
-	_costFunction(new costs_function_type(boost::bind(&SegmentationCostFunction::costs, this, _1, _2, _3, _4, _5))) {
+	_costFunction(new costs_function_type(boost::bind(&SegmentationCostFunction::costs, this, _1, _2, _3, _4, _5, _6))) {
 
 	registerInput(_membranes, "membranes");
 	registerInput(_parameters, "parameters");
@@ -35,7 +36,8 @@ SegmentationCostFunction::costs(
 		const std::vector<boost::shared_ptr<EndSegment> >&          ends,
 		const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 		const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
-		const std::vector<boost::shared_ptr<SegmentPair> >&         segmnetPairs,
+		const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
+		const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairs,
 		std::vector<double>& segmentCosts) {
 
 	segmentCosts.resize(ends.size() + continuations.size() + branches.size(), 0);
