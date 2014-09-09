@@ -47,7 +47,7 @@ LinearCostFunction::costs(
 		const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairEnds,
 		std::vector<double>& segmentCosts) {
 
-	segmentCosts.resize(ends.size() + continuations.size() + branches.size() + segmentPairs.size() + segmentPairEnds.size() + , 0);
+	segmentCosts.resize(ends.size() + continuations.size() + branches.size() + segmentPairs.size() + segmentPairEnds.size() , 0);
 
 	if (segmentCosts.size() == _cache.size()) {
 

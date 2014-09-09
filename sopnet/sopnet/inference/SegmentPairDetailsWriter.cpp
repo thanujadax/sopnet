@@ -186,11 +186,11 @@ SegmentPairDetailsWriter::writeSegmentPairEndComponentDetails(boost::shared_ptr<
 	segmentPairEndIsi = segmentPairEnd->getInterSectionInterval();
 	segmentPairEndDirection = segmentPairEnd->getDirection();
 
-	contSegId = segmentPairEnd->getContinuationSegment()->getId;
+	contSegId = (segmentPairEnd->getContinuationSegment())->getId();
 	contSegVarId = _problemConfiguration->getVariable(contSegId);
 	contSegIsi = segmentPairEnd->getContinuationSegment()->getInterSectionInterval();
 
-	endSegId = segmentPairEnd->getEndSegment()->getId;
+	endSegId = (segmentPairEnd->getEndSegment())->getId();
 	endSegVarId = _problemConfiguration->getVariable(endSegId);
 	endSegIsi = segmentPairEnd->getEndSegment()->getInterSectionInterval();
 

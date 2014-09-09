@@ -37,7 +37,7 @@ SegmentationCostFunction::costs(
 		const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 		const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
 		const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
-		const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairs,
+		const std::vector<boost::shared_ptr<SegmentPairEnd> >&      segmentPairEnds,
 		std::vector<double>& segmentCosts) {
 
 	segmentCosts.resize(ends.size() + continuations.size() + branches.size(), 0);

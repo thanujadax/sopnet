@@ -11,6 +11,7 @@
 #include <pipeline/all.h>
 #include <sopnet/segments/Segments.h>
 #include <sopnet/segments/SegmentPair.h>
+#include <sopnet/segments/SegmentPairEnd.h>
 #include "Features.h"
 /*
  *

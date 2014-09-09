@@ -38,7 +38,7 @@ SegmentPairEndFeatureExtractor::updateOutputs(){
 
     LOG_DEBUG(segmentpairendfeatureextractorlog) << "extracting features" << std::endl;
 
-    unsigned int numSegmentPairFeatures = 5;
+    unsigned int numSegmentPairEndFeatures = 5;
 
     _features->clear();
 
@@ -73,7 +73,7 @@ SegmentPairEndFeatureExtractor::updateOutputs(){
 }
 
 void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment> end, std::vector<double>& features){
+SegmentPairEndFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment> end, std::vector<double>& features){
 
 	features[0] = 0;
 	features[1] = Features::NoFeatureValue;
@@ -84,7 +84,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<EndSegment>
 }
 
 void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<ContinuationSegment> continuation, std::vector<double>& features){
+SegmentPairEndFeatureExtractor::computeFeatures(const boost::shared_ptr<ContinuationSegment> continuation, std::vector<double>& features){
 
 	features[0] = 0;
 	features[1] = Features::NoFeatureValue;
@@ -95,7 +95,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<Continuatio
 }
 
 void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegment> branch, std::vector<double>& features){
+SegmentPairEndFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegment> branch, std::vector<double>& features){
 
 	features[0] = 0;
 	features[1] = Features::NoFeatureValue;
@@ -106,7 +106,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<BranchSegme
 }
 
 void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair> segmentPair, std::vector<double>& features){
+SegmentPairEndFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair> segmentPair, std::vector<double>& features){
 
 	features[0] = 0;
 	features[1] = Features::NoFeatureValue;
@@ -117,7 +117,7 @@ SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPair
 }
 
 void
-SegmentPairFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPairEnd> segmentPairEnd, std::vector<double>& features){
+SegmentPairEndFeatureExtractor::computeFeatures(const boost::shared_ptr<SegmentPairEnd> segmentPairEnd, std::vector<double>& features){
 
 	double areaChangeProduct, d2Area;
 	boost::shared_ptr<ContinuationSegment> continuationSegment = segmentPairEnd->getContinuationSegment();

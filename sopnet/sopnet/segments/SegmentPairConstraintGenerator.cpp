@@ -50,7 +50,7 @@ SegmentPairConstraintGenerator::assembleLinearConstraints(){
 	}
 
 	if(_segmentPairEnds.isSet() && *_withSegmentPairEnds){
-		LOG_DEBUG(segmentpairextractorlog) << "assembling linear constraints for segment pair ends..." << std::endl;
+		LOG_DEBUG(segmentpairconstraintgeneratorlog) << "assembling linear constraints for segment pair ends..." << std::endl;
 		/* For each segment pair end p_ij consisting of segments s_i and s_j the following 2 constraints are added
 		 * 1). p_ij - s_i -s_j >= -1
 		 * 2). -2*p_ij + s_i + s_j >= 0
@@ -91,7 +91,7 @@ SegmentPairConstraintGenerator::assembleLinearConstraint(boost::shared_ptr<Segme
 }
 
 void
-SegmentPairExtractor::assembleLinearConstraint(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,
+SegmentPairConstraintGenerator::assembleLinearConstraint(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,
 		double coefSegmentPairEnd, double coefContinuation, double coefEnd, Relation relation, double value){
 
 	LinearConstraint constraint;
