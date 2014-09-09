@@ -70,6 +70,18 @@ SegmentPairDetailsWriter::writeSegmentPairProperties(const std::string segmentPa
 
 	}
 
+	foreach(boost::shared_ptr<SegmentPairEnd> segmentPairEnd, _segments->getSegmentPairEnds() ){
+
+		writeSegmentPairEndComponentDetails(segmentPairEnd,segmentPairPropertiesOutput);
+
+		writeSegmentPairEndCosts(segmentPairEnd,segmentPairPropertiesOutput);
+
+		writeSegmentPairEndFeatures(segmentPairEnd,segmentPairPropertiesOutput);
+
+		segmentPairPropertiesOutput << std::endl;
+
+	}
+
 	segmentPairPropertiesOutput.close();
 
 }
@@ -164,6 +176,34 @@ SegmentPairDetailsWriter::writeSegmentPairComponentDetails(boost::shared_ptr<Seg
 }
 
 void
+SegmentPairDetailsWriter::writeSegmentPairEndComponentDetails(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,std::ofstream& propOutput){
+
+	unsigned int segmentPairEndId, segmentPairEndVarId, segmentPairEndIsi, segmentPairEndDirection;
+	unsigned int contSegId, contSegVarId, contSegIsi, endSegId, endSegVarId, endSegIsi;
+
+	segmentPairEndId = segmentPairEnd->getId();
+	segmentPairEndVarId = _problemConfiguration->getVariable(segmentPairEndId);
+	segmentPairEndIsi = segmentPairEnd->getInterSectionInterval();
+	segmentPairEndDirection = segmentPairEnd->getDirection();
+
+	contSegId = segmentPairEnd->getContinuationSegment()->getId;
+	contSegVarId = _problemConfiguration->getVariable(contSegId);
+	contSegIsi = segmentPairEnd->getContinuationSegment()->getInterSectionInterval();
+
+	endSegId = segmentPairEnd->getEndSegment()->getId;
+	endSegVarId = _problemConfiguration->getVariable(endSegId);
+	endSegIsi = segmentPairEnd->getEndSegment()->getInterSectionInterval();
+
+	propOutput << "SPEid: " << segmentPairEndId << "; SPEVarId: " << segmentPairEndVarId;
+	propOutput << "; SPEIsi: " << segmentPairEndIsi << "; SPEDirection: " << segmentPairEndDirection;
+
+	propOutput << "; ContId: " << contSegId << "; ContVarId: " << contSegVarId << "; ContIsi: " << contSegIsi;
+	propOutput << "; EndId: " << endSegId << "; EndVarId: " << endSegVarId << "; EndIsi: " << endSegIsi;
+
+
+}
+
+void
 SegmentPairDetailsWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out){
 	/*
 	 *
@@ -172,7 +212,14 @@ SegmentPairDetailsWriter::writeSegmentPairCosts(boost::shared_ptr<SegmentPair> s
 }
 
 void
+SegmentPairDetailsWriter::writeSegmentPairEndCosts(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,std::ofstream& out){
+	/*
+	 *
+	 */
 
+}
+
+void
 SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& featuresOutput){
 
 
@@ -192,6 +239,23 @@ SegmentPairDetailsWriter::writeSegmentPairFeatures(boost::shared_ptr<SegmentPair
 }
 
 void
+SegmentPairDetailsWriter::writeSegmentPairEndFeatures(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,std::ofstream& featuresOutput){
+
+	const std::vector<double>& features = _features->get(segmentPairEnd->getId());
+	/*for (unsigned int j = 0; j < features.size(); j++) {
+		featuresOutput << features[j] << " ";
+	}
+	featuresOutput << std::endl;
+	*/
+	featuresOutput << "isSegPairEnd " << features[65] << "; ";
+	featuresOutput << "endArea " << features[66] << "; ";
+	featuresOutput << "changeOfArea " << features[67] << "; ";
+	featuresOutput << "changeOfArea/C " << features[68] << "; ";
+	featuresOutput << "changeOfArea/E " << features[69] << "; ";
+
+}
+
+void
 SegmentPairDetailsWriter::writeSegmentPairConstraints(const std::string segmentPairConstraintsFile){
 	/* From the total number of constraints, only pick the constraints relevant for segment pairs.
 	 * Currently we have 2 constraints per each segment pair and they are the last block of linear constraints
@@ -202,6 +266,7 @@ SegmentPairDetailsWriter::writeSegmentPairConstraints(const std::string segmentP
 
 	unsigned int numSegPairs = _segments->getSegmentPairs().size();
 	unsigned int numSegPairConstraints = numSegPairs * 2;
+	unsigned int numSegPairEndConstraints = _segments->getSegmentPairEnds().size() * 2;
 
 /*	unsigned int segPairConstraintStart, segPairConstraintStop;
 
@@ -210,6 +275,7 @@ SegmentPairDetailsWriter::writeSegmentPairConstraints(const std::string segmentP
 
 	constraintOutput << "Total number constraints = " << _linearConstraints->size() << std::endl;
 	constraintOutput << "Number of segment pair constraints = " << numSegPairConstraints << std::endl;
+	constraintOutput << "Number of segment pair end constraints = " << numSegPairEndConstraints << std::endl;
 
 /*	for(unsigned int i=segPairConstraintStart; i<segPairConstraintStop; i++){
 

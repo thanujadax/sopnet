@@ -28,6 +28,7 @@ class SegmentPairDetailsWriter : public pipeline::SimpleProcessNode<>  {
 			 const std::vector<boost::shared_ptr<ContinuationSegment> >& continuations,
 			 const std::vector<boost::shared_ptr<BranchSegment> >&       branches,
 			 const std::vector<boost::shared_ptr<SegmentPair> >&         segmentPairs,
+			 const std::vector<boost::shared_ptr<SegmentPairEnd> >&         segmentPairEnds,
 			 std::vector<double>& costs)>
 			costs_function_type;
 
@@ -49,9 +50,15 @@ private :
 
 	void writeSegmentPairComponentDetails(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);
 
+	void writeSegmentPairEndComponentDetails(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,std::ofstream& out);
+
 	void writeSegmentPairCosts(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);
 
+	void writeSegmentPairEndCosts(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,std::ofstream& out);
+
 	void writeSegmentPairFeatures(boost::shared_ptr<SegmentPair> segmentPair,std::ofstream& out);
+
+	void writeSegmentPairEndFeatures(boost::shared_ptr<SegmentPairEnd> segmentPairEnd,std::ofstream& out);
 
 	// all extracted segments
 	pipeline::Input<Segments> _segments;
