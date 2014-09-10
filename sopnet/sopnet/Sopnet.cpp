@@ -204,7 +204,7 @@ Sopnet::createBasicPipeline() {
 		_segmentPairConstraintGenerator->setInput("with segment pair ends", _withSegmentPairEnds);
 
 		// segment pair linear constraint generator
-		_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+		_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
 
 	}
 
@@ -270,22 +270,22 @@ Sopnet::createBasicPipeline() {
 
 	if(optionWithSegmentPairs){
 		// segment pair linear constraint generator
-		//_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
+		_segmentPairConstraintGenerator->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 
 		// add segment pairs from segmentPairExtractor, to problemAssembler
 		_problemAssembler->setInput("segment pairs", _segmentPairExtractor->getOutput("segment pairs"));
 		//_problemAssembler->setInput("segment pair linear constraints", _segmentPairExtractor->getOutput("segment pair linear constraints"));
-		_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
+		//_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
 	}
 
 	if(optionWithSegmentPairEnds){
 		// linear constraint generator for segment pair ends
-		//_segmentPairConstraintGenerator->setInput("segment pair ends", _segmentPairExtractor->getOutput("segment pair ends"));
+		_segmentPairConstraintGenerator->setInput("segment pair ends", _segmentPairExtractor->getOutput("segment pair ends"));
 
 		// add segment pair ends from segmentPairExtractor, to problemAssembler
 		_problemAssembler->setInput("segment pair ends", _segmentPairExtractor->getOutput("segment pair ends"));
 
-		_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
+		//_problemAssembler->setInput("segment pair linear constraints", _segmentPairConstraintGenerator->getOutput("segment pair linear constraints"));
 	}
 
 

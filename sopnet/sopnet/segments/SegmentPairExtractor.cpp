@@ -172,7 +172,7 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 
 		}
 
-		if(nextInterSectionInterval < _allSegments->getNumInterSectionIntervals()){
+		if(nextInterSectionInterval < _allSegments->getNumInterSectionIntervals() - 1 ){
 			// from the end segment of the next slice
 			std::vector<boost::shared_ptr<EndSegment> > nextIntervalEndSegments
 						= _allSegments->getEnds(nextInterSectionInterval);
@@ -204,7 +204,7 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 		}
 
 
-		if(nextInterSectionInterval < _allSegments->getNumInterSectionIntervals()){
+		if(nextInterSectionInterval < _allSegments->getNumInterSectionIntervals() - 1){
 			// from the end segment of the next slice
 			std::vector<boost::shared_ptr<EndSegment> > nextIntervalEndSegments
 						= _allSegments->getEnds(nextInterSectionInterval);
