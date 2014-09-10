@@ -12,6 +12,7 @@ static logger::LogChannel segmentpairextractorlog("segmentpairextractorlog", "[S
 
 SegmentPairExtractor::SegmentPairExtractor() :
 	_segmentPairs(new Segments()),
+	_segmentPairEnds(new Segments()),
 	_linearConstraints(new LinearConstraints),
 	_allSegments(boost::make_shared<Segments>()){
 
@@ -155,7 +156,7 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 	if(segment->getDirection() == Right) {
 
 		// from the end segment of the previous slice
-		if(thisInterSectionInterval>0){
+		if(thisInterSectionInterval>1){
 			unsigned int prevInterSectionInterval = thisInterSectionInterval - 1;
 			// get all end segments in the prev interSectionInterval, continuing from this segment
 			std::vector<boost::shared_ptr<EndSegment> > prevIntervalEndSegments
@@ -197,7 +198,7 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 		// continuation segment goes left
 		// from the end segment of the previous slice
 		LOG_ALL(segmentpairextractorlog) << "test8" << std::endl;
-		if(thisInterSectionInterval>0){
+		if(thisInterSectionInterval>1){
 			unsigned int prevInterSectionInterval = thisInterSectionInterval - 1;
 			// get all end segments in the prev interSectionInterval, continuing from this segment
 			std::vector<boost::shared_ptr<EndSegment> > prevIntervalEndSegments

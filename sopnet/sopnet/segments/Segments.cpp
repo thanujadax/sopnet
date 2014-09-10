@@ -100,15 +100,10 @@ Segments::resize(int numInterSectionInterval) {
 		_segmentPairTrees.resize(numInterSectionInterval, 0);
 		_segmentPairTreeDirty.resize(numInterSectionInterval, true);
 
-		std::cout << "Segments.cpp: test40" << std::endl;
 		_segmentPairEnds.resize(numInterSectionInterval);
-		std::cout << "Segments.cpp: test41" << std::endl;
 		_segmentPairEndAdaptors.resize(numInterSectionInterval, 0);
-		std::cout << "Segments.cpp: test42" << std::endl;
 		_segmentPairEndTrees.resize(numInterSectionInterval, 0);
-		std::cout << "Segments.cpp: test43" << std::endl;
 		_segmentPairEndTreeDirty.resize(numInterSectionInterval, true);
-		std::cout << "Segments.cpp: test44" << std::endl;
 
 }
 
@@ -183,10 +178,11 @@ void
 Segments::add(boost::shared_ptr<SegmentPairEnd> segmentPairEnd) {
 
 	unsigned int interSectionInterval = segmentPairEnd->getInterSectionInterval();
-	std::cout << "Segments.cpp: test31" << std::endl;
+
 	// resize the vector of trees to hold as many trees as we have inter-section
 	// intervals
 	std::cout << "Segments.cpp: segmentPairEndTrees.size() = " << _segmentPairEndTrees.size() << std::endl;
+
 	std::cout << "Segments.cpp: interSectionInterval = " << interSectionInterval << std::endl;
 
 	if (_segmentPairEndTrees.size() < interSectionInterval + 1) {
