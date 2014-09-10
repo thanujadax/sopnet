@@ -172,15 +172,17 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 
 		}
 
-		// from the end segment of the next slice
-		std::vector<boost::shared_ptr<EndSegment> > nextIntervalEndSegments
-					= _allSegments->getEnds(nextInterSectionInterval);
-		foreach(boost::shared_ptr<EndSegment> nextEndSegment, nextIntervalEndSegments){
+		if(nextInterSectionInterval < _allSegments->getNumInterSectionIntervals()){
+			// from the end segment of the next slice
+			std::vector<boost::shared_ptr<EndSegment> > nextIntervalEndSegments
+						= _allSegments->getEnds(nextInterSectionInterval);
+			foreach(boost::shared_ptr<EndSegment> nextEndSegment, nextIntervalEndSegments){
 
-			if(nextEndSegment->getDirection() == Right && (segment->getTargetSlice() == nextEndSegment->getSlice())){
+				if(nextEndSegment->getDirection() == Right && (segment->getTargetSlice() == nextEndSegment->getSlice())){
 
-				addNextSegmentPairEnd(Right,segment,nextEndSegment);
-				LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
+					addNextSegmentPairEnd(Right,segment,nextEndSegment);
+					LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
+				}
 			}
 		}
 
@@ -201,16 +203,19 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 
 		}
 
-		// from the end segment of the next slice
-		std::vector<boost::shared_ptr<EndSegment> > nextIntervalEndSegments
-					= _allSegments->getEnds(nextInterSectionInterval);
 
-		foreach(boost::shared_ptr<EndSegment> nextEndSegment, nextIntervalEndSegments){
+		if(nextInterSectionInterval < _allSegments->getNumInterSectionIntervals()){
+			// from the end segment of the next slice
+			std::vector<boost::shared_ptr<EndSegment> > nextIntervalEndSegments
+						= _allSegments->getEnds(nextInterSectionInterval);
 
-			if(nextEndSegment->getDirection() == Right && (segment->getSourceSlice() == nextEndSegment->getSlice())){
+			foreach(boost::shared_ptr<EndSegment> nextEndSegment, nextIntervalEndSegments){
 
-				addNextSegmentPairEnd(Right,segment,nextEndSegment);
-				LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
+				if(nextEndSegment->getDirection() == Right && (segment->getSourceSlice() == nextEndSegment->getSlice())){
+
+					addNextSegmentPairEnd(Right,segment,nextEndSegment);
+					LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
+				}
 			}
 		}
 	}
