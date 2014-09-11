@@ -47,13 +47,13 @@ SegmentPairEnd::getSlices() const {
 }
 
 boost::shared_ptr<Slice>
-SegmentPair::getSourceSlice() const {
+SegmentPairEnd::getSourceSlice() const {
 
 	return _sourceSlice;
 }
 
 boost::shared_ptr<Slice>
-SegmentPair::getTargetSlice() const {
+SegmentPairEnd::getTargetSlice() const {
 
 	return _targetSlice;
 }
