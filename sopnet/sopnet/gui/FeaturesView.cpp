@@ -28,6 +28,8 @@ FeaturesView::updateOutputs() {
 		segmentId = branch->getId();
 	foreach (boost::shared_ptr<SegmentPair> segmentPair, _segments->getSegmentPairs())
 			segmentId = segmentPair->getId();
+	foreach (boost::shared_ptr<SegmentPairEnd> segmentPairEnd, _segments->getSegmentPairEnds())
+				segmentId = segmentPairEnd->getId();
 
 	const unsigned int variable = _problemConfiguration->getVariable(segmentId);
 

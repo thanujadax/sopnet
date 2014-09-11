@@ -63,6 +63,11 @@ public:
 	void showSegmentPairs(bool show);
 
 	/**
+	 * Show segment pair ends.
+	 */
+	void showSegmentPairEnds(bool show);
+
+	/**
 	 * Show the ids of the slices and their connection partners.
 	 */
 	void showSliceIds(bool show);
@@ -124,12 +129,14 @@ private:
 	std::vector<boost::shared_ptr<ContinuationSegment> > _closestPrevContinuationSegments;
 	std::vector<boost::shared_ptr<BranchSegment> >       _closestPrevBranchSegments;
 	std::vector<boost::shared_ptr<SegmentPair> >         _closestPrevSegmentPairs;
+	std::vector<boost::shared_ptr<SegmentPairEnd> >         _closestPrevSegmentPairEnds;
 
 	// the closest next segments to the current focus
 	std::vector<boost::shared_ptr<EndSegment> >          _closestNextEndSegments;
 	std::vector<boost::shared_ptr<ContinuationSegment> > _closestNextContinuationSegments;
 	std::vector<boost::shared_ptr<BranchSegment> >       _closestNextBranchSegments;
 	std::vector<boost::shared_ptr<SegmentPair> >         _closestNextSegmentPairs;
+	std::vector<boost::shared_ptr<SegmentPairEnd> >         _closestNextSegmentPairEnds;
 
 	// the closest previous segment to show currently
 	unsigned int _closestPrevSegment;
@@ -152,6 +159,7 @@ private:
 	bool _showContinuations;
 	bool _showBranches;
 	bool _showSegmentPairs;
+	bool _showSegmentPairEnds;
 
 	// show slice ids
 	bool _showSliceIds;

@@ -97,6 +97,7 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showContinuations(false);
 		_painter->showBranches(false);
 		_painter->showSegmentPairs(false);
+		_painter->showSegmentPairEnds(false);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -108,6 +109,7 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showContinuations(true);
 		_painter->showBranches(false);
 		_painter->showSegmentPairs(false);
+		_painter->showSegmentPairEnds(false);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -119,6 +121,7 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showContinuations(false);
 		_painter->showBranches(true);
 		_painter->showSegmentPairs(false);
+		_painter->showSegmentPairEnds(false);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -130,6 +133,19 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showContinuations(false);
 		_painter->showBranches(false);
 		_painter->showSegmentPairs(true);
+		_painter->showSegmentPairEnds(false);
+
+		setDirty(_painter);
+		setDirty(_visibleSegments);
+	}
+
+	if (signal.key == gui::keys::Q) {
+
+		_painter->showEnds(false);
+		_painter->showContinuations(false);
+		_painter->showBranches(false);
+		_painter->showSegmentPairs(false);
+		_painter->showSegmentPairEnds(true);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
@@ -141,10 +157,12 @@ SegmentsStackView::onKeyDown(gui::KeyDown& signal) {
 		_painter->showContinuations(true);
 		_painter->showBranches(true);
 		_painter->showSegmentPairs(true);
+		_painter->showSegmentPairEnds(true);
 
 		setDirty(_painter);
 		setDirty(_visibleSegments);
 	}
+
 
 	if (signal.key == gui::keys::N) {
 

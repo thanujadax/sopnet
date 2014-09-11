@@ -165,7 +165,9 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 
 				if(prevEndSegment->getDirection() == Left && (segment->getSourceSlice() == prevEndSegment->getSlice())){
 
-					addNextSegmentPairEnd(Left,segment,prevEndSegment);
+					addNextSegmentPairEnd(Left,segment,prevEndSegment,
+							segment->getTargetSlice(),
+							segment->getSourceSlice());
 					LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
 				}
 			}
@@ -180,7 +182,9 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 
 				if(nextEndSegment->getDirection() == Right && (segment->getTargetSlice() == nextEndSegment->getSlice())){
 
-					addNextSegmentPairEnd(Right,segment,nextEndSegment);
+					addNextSegmentPairEnd(Right,segment,nextEndSegment,
+							segment->getSourceSlice(),
+							segment->getTargetSlice());
 					LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
 				}
 			}
@@ -196,7 +200,9 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 						= _allSegments->getEnds(prevInterSectionInterval);
 			foreach(boost::shared_ptr<EndSegment> prevEndSegment, prevIntervalEndSegments){
 				if(prevEndSegment->getDirection() == Left && (segment->getTargetSlice() == prevEndSegment->getSlice())){
-					addNextSegmentPairEnd(Left,segment,prevEndSegment);
+					addNextSegmentPairEnd(Left,segment,prevEndSegment,
+							segment->getSourceSlice(),
+							segment->getTargetSlice());
 					LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
 				}
 			}
@@ -213,7 +219,9 @@ SegmentPairExtractor::extractSegmentPairEnds(boost::shared_ptr<ContinuationSegme
 
 				if(nextEndSegment->getDirection() == Right && (segment->getSourceSlice() == nextEndSegment->getSlice())){
 
-					addNextSegmentPairEnd(Right,segment,nextEndSegment);
+					addNextSegmentPairEnd(Right,segment,nextEndSegment,
+							segment->getTargetSlice(),
+							segment->getSourceSlice());
 					LOG_ALL(segmentpairextractorlog) << "segment pair end added" << std::endl;
 				}
 			}
@@ -249,13 +257,17 @@ void
 SegmentPairExtractor::addNextSegmentPairEnd(
 		Direction direction,
 		boost::shared_ptr<ContinuationSegment> continuationSegment,
-		boost::shared_ptr<EndSegment> endSegment){
+		boost::shared_ptr<EndSegment> endSegment,
+		boost::shared_ptr<Slice> sourceSlice,
+		boost::shared_ptr<Slice> targetSlice){
 
 	boost::shared_ptr<SegmentPairEnd> segmentPairEnd = boost::make_shared<SegmentPairEnd>(
 			Segment::getNextSegmentId(),
 			direction ,
 			continuationSegment,
-			endSegment);
+			endSegment,
+			sourceSlice,
+			targetSlice);
 
 	_segmentPairEnds->add(segmentPairEnd);
 }

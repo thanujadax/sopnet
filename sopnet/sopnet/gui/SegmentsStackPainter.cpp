@@ -17,6 +17,7 @@ SegmentsStackPainter::SegmentsStackPainter(double gap) :
 	_showContinuations(true),
 	_showBranches(false),
 	_showSegmentPairs(false),
+	_showSegmentPairEnds(false),
 	_showSliceIds(true),
 	_focus(0, 0),
 	_zScale(15),
@@ -95,6 +96,16 @@ SegmentsStackPainter::showSegmentPairs(bool show) {
 }
 
 void
+SegmentsStackPainter::showSegmentPairEnds(bool show) {
+
+	LOG_DEBUG(segmentsstackpainterlog) << "showing segment pair ends: " << show << std::endl;
+
+	_showSegmentPairEnds = show;
+
+	updateVisibleSegments();
+}
+
+void
 SegmentsStackPainter::showSliceIds(bool show) {
 
 	_showSliceIds = show;
@@ -155,6 +166,18 @@ SegmentsStackPainter::setFocus(const util::point<double>& focus) {
 	_closestPrevSegmentPairs = _segments->findSegmentPairs(prevSegmentPair, 1000000000);
 	_closestNextSegmentPairs = _segments->findSegmentPairs(nextSegmentPair, 1000000000);
 
+	// create dummy segment pair ends for this slice
+	boost::shared_ptr<EndSegment> dummyEndSegment = boost::make_shared<EndSegment> (0, Right, dummySlice);
+
+	boost::shared_ptr<SegmentPairEnd> prevSegmentPairEnd = boost::make_shared<SegmentPairEnd>(0, Left,
+			dummyContinuationSegment, dummyEndSegment, dummySlice, dummySlice);
+	boost::shared_ptr<SegmentPairEnd> nextSegmentPairEnd = boost::make_shared<SegmentPairEnd>(0, Right,
+			dummyContinuationSegment, dummyEndSegment, dummySlice,dummySlice);
+
+	// find closest segment pairs to dummy segment pairs
+	_closestPrevSegmentPairEnds = _segments->findSegmentPairEnds(prevSegmentPairEnd, 1000000000);
+	_closestNextSegmentPairEnds = _segments->findSegmentPairEnds(nextSegmentPairEnd, 1000000000);
+
 	_closestPrevSegment = 0;
 	_closestNextSegment = 0;
 
@@ -166,6 +189,8 @@ SegmentsStackPainter::setFocus(const util::point<double>& focus) {
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextBranchSegments.size() << " next branch segments" << std::endl;
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestPrevSegmentPairs.size() << " prev segment pairs" << std::endl;
 	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextSegmentPairs.size() << " next segment pairs" << std::endl;
+	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestPrevSegmentPairEnds.size() << " prev segment pair ends" << std::endl;
+	LOG_DEBUG(segmentsstackpainterlog) << "found " << _closestNextSegmentPairEnds.size() << " next segment pair ends" << std::endl;
 
 	updateVisibleSegments();
 }
@@ -208,6 +233,14 @@ SegmentsStackPainter::nextSegment() {
 			numSegments = _closestPrevSegmentPairs.size();
 		else if (_showNext)
 			numSegments = _closestNextSegmentPairs.size();
+	}
+
+	if (_showSegmentPairEnds) {
+
+		if (_showPrev)
+			numSegments = _closestPrevSegmentPairEnds.size();
+		else if (_showNext)
+			numSegments = _closestNextSegmentPairEnds.size();
 	}
 
 	if (numSegments == 0)
@@ -302,8 +335,17 @@ SegmentsStackPainter::setCurrentSection(unsigned int section) {
 		size = sizeAddSlice(size, *segmentPair->getTargetSlice());
 
 		_textures.load(*segmentPair->getSourceSlice());
+		_textures.load(*segmentPair->getMidSlice());
 		_textures.load(*segmentPair->getTargetSlice());
-		_textures.load(*segmentPair->getTargetSlice());
+	}
+
+	foreach (boost::shared_ptr<SegmentPairEnd> segmentPairEnd, _segments->getSegmentPairEnds()) {
+
+		size = sizeAddSlice(size, *segmentPairEnd->getSourceSlice());
+		size = sizeAddSlice(size, *segmentPairEnd->getTargetSlice());
+
+		_textures.load(*segmentPairEnd->getSourceSlice());
+		_textures.load(*segmentPairEnd->getTargetSlice());
 	}
 
 	_sectionHeight = size.height();
@@ -340,6 +382,8 @@ SegmentsStackPainter::updateVisibleSegments() {
 			_prevSegments->add(_closestPrevBranchSegments[_closestPrevSegment]);
 		else if (_showSegmentPairs && _closestPrevSegmentPairs.size() > _closestPrevSegment)
 			_prevSegments->add(_closestPrevSegmentPairs[_closestPrevSegment]);
+		else if (_showSegmentPairEnds && _closestPrevSegmentPairEnds.size() > _closestPrevSegment)
+					_prevSegments->add(_closestPrevSegmentPairEnds[_closestPrevSegment]);
 
 	}
 
@@ -353,6 +397,8 @@ SegmentsStackPainter::updateVisibleSegments() {
 			_nextSegments->add(_closestNextBranchSegments[_closestNextSegment]);
 		else if (_showSegmentPairs && _closestNextSegmentPairs.size() > _closestNextSegment)
 			_nextSegments->add(_closestNextSegmentPairs[_closestNextSegment]);
+		else if (_showSegmentPairEnds && _closestNextSegmentPairEnds.size() > _closestNextSegment)
+					_nextSegments->add(_closestNextSegmentPairEnds[_closestNextSegment]);
 
 	}
 }
@@ -465,6 +511,25 @@ SegmentsStackPainter::draw(
 		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
 	}
 
+	foreach (boost::shared_ptr<SegmentPairEnd> segmentPairEnd, _prevSegments->getSegmentPairEnds()) {
+
+		LOG_ALL(segmentsstackpainterlog) << "drawing a segmentPairEnd..." << std::endl;
+
+		drawSlice(
+				*segmentPairEnd->getSourceSlice(),
+				(segmentPairEnd->getDirection() == Right ? -_zScale : 0.0),
+				0.0, 1.0, 0.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
+				*segmentPairEnd->getTargetSlice(),
+				(segmentPairEnd->getDirection() == Left  ? -_zScale : 0.0),
+				0.0, 1.0, 0.0, 0.85,
+				roi, resolution);
+
+		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
+	}
+
 	// to next section
 
 	foreach (boost::shared_ptr<EndSegment> end, _nextSegments->getEnds()) {
@@ -543,6 +608,25 @@ SegmentsStackPainter::draw(
 				*segmentPair->getTargetSlice(),
 				_zScale,
 				0.0, 0.0, 1.0, 0.85,
+				roi, resolution);
+
+		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
+	}
+
+	foreach (boost::shared_ptr<SegmentPairEnd> segmentPairEnd, _nextSegments->getSegmentPairEnds()) {
+
+		LOG_ALL(segmentsstackpainterlog) << "drawing a segmentPairEnd..." << std::endl;
+
+		drawSlice(
+				*segmentPairEnd->getSourceSlice(),
+				(segmentPairEnd->getDirection() == Left ? _zScale : 0.0),
+				0.0, 1.0, 0.0, 0.85,
+				roi, resolution);
+
+		drawSlice(
+				*segmentPairEnd->getTargetSlice(),
+				(segmentPairEnd->getDirection() == Right ? _zScale : 0.0),
+				0.0, 1.0, 0.0, 0.85,
 				roi, resolution);
 
 		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
@@ -627,8 +711,10 @@ SegmentsStackPainter::getVisibleSegments(Segments& segments) {
 	segments.addAll(_prevSegments->getContinuations());
 	segments.addAll(_prevSegments->getBranches());
 	segments.addAll(_prevSegments->getSegmentPairs());
+	segments.addAll(_prevSegments->getSegmentPairEnds());
 	segments.addAll(_nextSegments->getEnds());
 	segments.addAll(_nextSegments->getContinuations());
 	segments.addAll(_nextSegments->getBranches());
 	segments.addAll(_nextSegments->getSegmentPairs());
+	segments.addAll(_nextSegments->getSegmentPairEnds());
 }
