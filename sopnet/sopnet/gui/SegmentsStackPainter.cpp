@@ -518,13 +518,13 @@ SegmentsStackPainter::draw(
 		drawSlice(
 				*segmentPairEnd->getSourceSlice(),
 				(segmentPairEnd->getDirection() == Right ? -_zScale : 0.0),
-				0.0, 1.0, 0.0, 0.85,
+				1.0, 1.0, 0.0, 0.85,
 				roi, resolution);
 
 		drawSlice(
 				*segmentPairEnd->getTargetSlice(),
 				(segmentPairEnd->getDirection() == Left  ? -_zScale : 0.0),
-				0.0, 1.0, 0.0, 0.85,
+				1.0, 1.0, 0.0, 0.85,
 				roi, resolution);
 
 		LOG_ALL(segmentsstackpainterlog) << "done" << std::endl;
